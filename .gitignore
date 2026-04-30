@@ -15,5 +15,8 @@ data/state.json
 data/*.corrupt-*
 logs/*.log*
 
+# OMC orchestration state (local dev only)
+.omc/
+
 # OS
 .DS_Store
