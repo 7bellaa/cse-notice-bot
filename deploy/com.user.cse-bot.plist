@@ -8,15 +8,15 @@
 
     <key>ProgramArguments</key>
     <array>
-        <string>/Users/7bellaa/cseDiscordBot/.venv/bin/python</string>
+        <string>/Users/7bella/cseDiscordBot/.venv/bin/python</string>
         <string>-m</string>
         <string>cse_bot.main</string>
         <string>--config</string>
-        <string>/Users/7bellaa/cseDiscordBot/config/config.toml</string>
+        <string>/Users/7bella/cseDiscordBot/config/config.toml</string>
     </array>
 
     <key>WorkingDirectory</key>
-    <string>/Users/7bellaa/cseDiscordBot</string>
+    <string>/Users/7bella/cseDiscordBot</string>
 
     <key>EnvironmentVariables</key>
     <dict>
@@ -37,10 +37,10 @@
     </array>
 
     <key>StandardOutPath</key>
-    <string>/Users/7bellaa/cseDiscordBot/logs/launchd.stdout.log</string>
+    <string>/Users/7bella/cseDiscordBot/logs/launchd.stdout.log</string>
 
     <key>StandardErrorPath</key>
-    <string>/Users/7bellaa/cseDiscordBot/logs/launchd.stderr.log</string>
+    <string>/Users/7bella/cseDiscordBot/logs/launchd.stderr.log</string>
 
     <key>RunAtLoad</key>
     <false/>
