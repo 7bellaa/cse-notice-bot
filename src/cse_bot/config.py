@@ -1,0 +1,128 @@
+"""Load and validate runtime configuration from TOML + environment."""
+from __future__ import annotations
+
+import os
+import tomllib
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Literal
+
+from cse_bot.models import BoardConfig
+
+VALID_FORMATS: tuple[str, ...] = ("minimal", "medium", "detailed")
+
+
+class ConfigError(Exception):
+    """Raised on any configuration validation error."""
+
+
+@dataclass(frozen=True)
+class GeneralConfig:
+    log_dir: str
+    state_file: str
+    max_pages: int
+    http_timeout_seconds: float
+    http_retries: int
+
+
+@dataclass(frozen=True)
+class NotificationConfig:
+    format: Literal["minimal", "medium", "detailed"]
+    self_alert_webhook_env: str
+
+
+@dataclass(frozen=True)
+class Config:
+    general: GeneralConfig
+    notification: NotificationConfig
+    boards: list[BoardConfig]
+    _webhook_urls: dict[str, str]
+    alert_webhook_url: str
+
+    def webhook_url(self, board_id: str) -> str:
+        try:
+            return self._webhook_urls[board_id]
+        except KeyError as e:
+            raise ConfigError(f"no webhook resolved for board {board_id}") from e
+
+
+def load_config(path: Path) -> Config:
+    if not path.exists():
+        raise ConfigError(f"config file not found: {path}")
+    raw: dict[str, Any] = tomllib.loads(path.read_text(encoding="utf-8"))
+
+    general = _load_general(raw)
+    notification = _load_notification(raw)
+    boards = _load_boards(raw)
+
+    webhook_urls: dict[str, str] = {}
+    for b in boards:
+        if not b.enabled:
+            continue
+        url = os.environ.get(b.webhook_env)
+        if not url:
+            raise ConfigError(
+                f"environment variable {b.webhook_env} is required for board {b.id}"
+            )
+        webhook_urls[b.id] = url
+
+    alert_env = notification.self_alert_webhook_env
+    alert_url = os.environ.get(alert_env)
+    if not alert_url:
+        raise ConfigError(f"environment variable {alert_env} is required (alert webhook)")
+
+    return Config(
+        general=general,
+        notification=notification,
+        boards=boards,
+        _webhook_urls=webhook_urls,
+        alert_webhook_url=alert_url,
+    )
+
+
+def _load_general(raw: dict[str, Any]) -> GeneralConfig:
+    g: dict[str, Any] = raw.get("general") or {}
+    try:
+        return GeneralConfig(
+            log_dir=str(g["log_dir"]),
+            state_file=str(g["state_file"]),
+            max_pages=int(g["max_pages"]),
+            http_timeout_seconds=float(g["http_timeout_seconds"]),
+            http_retries=int(g["http_retries"]),
+        )
+    except KeyError as e:
+        raise ConfigError(f"missing [general] key: {e.args[0]}") from e
+
+
+def _load_notification(raw: dict[str, Any]) -> NotificationConfig:
+    n: dict[str, Any] = raw.get("notification") or {}
+    fmt = str(n.get("format", ""))
+    if fmt not in VALID_FORMATS:
+        raise ConfigError(
+            f"invalid notification.format={fmt!r}; expected one of {VALID_FORMATS}"
+        )
+    alert = str(n.get("self_alert_webhook_env", ""))
+    if not alert:
+        raise ConfigError("notification.self_alert_webhook_env is required")
+    return NotificationConfig(format=fmt, self_alert_webhook_env=alert)  # type: ignore[arg-type]
+
+
+def _load_boards(raw: dict[str, Any]) -> list[BoardConfig]:
+    items: list[Any] = raw.get("boards") or []
+    if not items:
+        raise ConfigError("at least one [[boards]] entry is required")
+    boards: list[BoardConfig] = []
+    for i, b in enumerate(items):
+        try:
+            boards.append(
+                BoardConfig(
+                    id=str(b["id"]),
+                    name=str(b["name"]),
+                    url=str(b["url"]),
+                    webhook_env=str(b["webhook_env"]),
+                    enabled=bool(b.get("enabled", True)),
+                )
+            )
+        except KeyError as e:
+            raise ConfigError(f"[[boards]] index {i}: missing key {e.args[0]}") from e
+    return boards

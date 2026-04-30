@@ -1,0 +1,17 @@
+[general]
+log_dir = "logs"
+state_file = "data/state.json"
+max_pages = 2
+http_timeout_seconds = 15
+http_retries = 3
+
+[notification]
+format = "medium"
+self_alert_webhook_env = "DISCORD_WEBHOOK_ALERT"
+
+[[boards]]
+id = "14221"
+name = "정컴 일반공지"
+url = "https://cse.pusan.ac.kr/cse/14221/subview.do"
+webhook_env = "DISCORD_WEBHOOK_GENERAL"
+enabled = true
