@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import os
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
@@ -18,8 +19,36 @@ log = logging.getLogger("cse_bot.main")
 EMPTY_STREAK_ALERT_THRESHOLD = 3
 
 
+def _load_dotenv(env_path: Path) -> None:
+    """Load KEY=VALUE pairs from *env_path* into os.environ.
+
+    Existing environment variables are NOT overwritten — explicit env wins.
+    Silently does nothing if the file is missing.
+    """
+    if not env_path.exists():
+        return
+    for raw in env_path.read_text(encoding="utf-8").splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, value = line.partition("=")
+        key = key.strip()
+        value = value.strip()
+        if (value.startswith('"') and value.endswith('"')) or (
+            value.startswith("'") and value.endswith("'")
+        ):
+            value = value[1:-1]
+        if key and key not in os.environ:
+            os.environ[key] = value
+
+
 def run_cycle(config_path: Path) -> int:
     """Run one full check cycle. Returns exit code (0 = success, non-zero = error)."""
+    # Auto-load .env from project root (parent of config dir) so launchd-spawned
+    # processes get webhook URLs without manual `set -a; source .env`.
+    project_root = config_path.resolve().parent.parent
+    _load_dotenv(project_root / ".env")
+
     try:
         cfg = load_config(config_path)
     except ConfigError as e:

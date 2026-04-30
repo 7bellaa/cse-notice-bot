@@ -210,3 +210,48 @@ def test_uncaught_exception_triggers_alert(
     exit_code = run_cycle(cfg_file)
     assert exit_code != 0
     assert alert_route.called
+
+
+def test_load_dotenv_populates_env(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from cse_bot.main import _load_dotenv
+
+    env_path = tmp_path / ".env"
+    env_path.write_text(
+        '# comment line\n'
+        'DISCORD_WEBHOOK_GENERAL=https://discord.com/api/webhooks/1/aaa\n'
+        'DISCORD_WEBHOOK_ALERT="https://discord.com/api/webhooks/2/bbb"\n'
+        '\n'
+        "EMPTY_VALUE=\n",
+        encoding="utf-8",
+    )
+    monkeypatch.delenv("DISCORD_WEBHOOK_GENERAL", raising=False)
+    monkeypatch.delenv("DISCORD_WEBHOOK_ALERT", raising=False)
+    monkeypatch.delenv("EMPTY_VALUE", raising=False)
+
+    _load_dotenv(env_path)
+
+    import os
+    assert os.environ["DISCORD_WEBHOOK_GENERAL"] == "https://discord.com/api/webhooks/1/aaa"
+    assert os.environ["DISCORD_WEBHOOK_ALERT"] == "https://discord.com/api/webhooks/2/bbb"
+
+
+def test_load_dotenv_does_not_override_existing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from cse_bot.main import _load_dotenv
+
+    env_path = tmp_path / ".env"
+    env_path.write_text("DISCORD_WEBHOOK_GENERAL=from_dotenv\n", encoding="utf-8")
+    monkeypatch.setenv("DISCORD_WEBHOOK_GENERAL", "from_shell")
+
+    _load_dotenv(env_path)
+
+    import os
+    assert os.environ["DISCORD_WEBHOOK_GENERAL"] == "from_shell"
+
+
+def test_load_dotenv_missing_file_is_no_op(tmp_path: Path) -> None:
+    from cse_bot.main import _load_dotenv
+    _load_dotenv(tmp_path / "does_not_exist.env")  # must not raise
