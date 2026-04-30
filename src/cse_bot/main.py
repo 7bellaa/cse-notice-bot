@@ -167,7 +167,19 @@ def main(argv: list[str] | None = None) -> int:
         help="Path to config.toml",
     )
     args = p.parse_args(argv)
-    return run_cycle(args.config)
+    try:
+        return run_cycle(args.config)
+    except Exception as e:  # noqa: BLE001
+        # Last-line defence: log and try to alert.
+        log.exception("cycle.unhandled err=%s", e)
+        try:
+            cfg = load_config(args.config)
+            notifier.send_alert(
+                f"❌ cse_bot cycle crashed: {e}", webhook_url=cfg.alert_webhook_url
+            )
+        except Exception:  # noqa: BLE001
+            log.exception("alert.unreachable")
+        return 1
 
 
 if __name__ == "__main__":

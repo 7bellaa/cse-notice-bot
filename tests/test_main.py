@@ -193,3 +193,20 @@ def test_page_2_fetched_when_first_page_all_new(
     assert exit_code == 0
     # All 40 posts have ids > 19000, so all 40 are notified.
     assert notify_route.call_count == 40
+
+
+@respx.mock
+def test_uncaught_exception_triggers_alert(
+    cfg_file: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    alert_route = respx.post(ALERT).mock(return_value=httpx.Response(204))
+
+    def boom(*_args, **_kwargs):
+        raise RuntimeError("simulated catastrophic failure")
+
+    # Force fetcher.fetch to blow up before any HTTP mock matches.
+    monkeypatch.setattr("cse_bot.main.fetcher.fetch", boom)
+
+    exit_code = run_cycle(cfg_file)
+    assert exit_code != 0
+    assert alert_route.called
