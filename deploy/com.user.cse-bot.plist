@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.user.cse-bot</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/7bellaa/cseDiscordBot/.venv/bin/python</string>
+        <string>-m</string>
+        <string>cse_bot.main</string>
+        <string>--config</string>
+        <string>/Users/7bellaa/cseDiscordBot/config/config.toml</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/7bellaa/cseDiscordBot</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PYTHONUNBUFFERED</key>
+        <string>1</string>
+    </dict>
+
+    <key>StartCalendarInterval</key>
+    <array>
+        <dict>
+            <key>Hour</key><integer>9</integer>
+            <key>Minute</key><integer>0</integer>
+        </dict>
+        <dict>
+            <key>Hour</key><integer>18</integer>
+            <key>Minute</key><integer>0</integer>
+        </dict>
+    </array>
+
+    <key>StandardOutPath</key>
+    <string>/Users/7bellaa/cseDiscordBot/logs/launchd.stdout.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/7bellaa/cseDiscordBot/logs/launchd.stderr.log</string>
+
+    <key>RunAtLoad</key>
+    <false/>
+</dict>
+</plist>
