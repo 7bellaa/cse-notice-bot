@@ -12,16 +12,13 @@ Selectors target the JW CMS table layout used by cse.pusan.ac.kr:
 from __future__ import annotations
 
 import re
-from urllib.parse import urljoin
+from urllib.parse import parse_qs, urljoin, urlparse
 
 from bs4 import BeautifulSoup, Tag
 
 from cse_bot.models import Post
 
 BASE_URL = "https://cse.pusan.ac.kr"
-
-# Matches /bbs/<board>/<menu>/<post_id>/artclView.do
-_ARTCL_ID_RE = re.compile(r"/bbs/[^/]+/[^/]+/(\d+)/artclView")
 
 
 class ParseEmptyError(Exception):
@@ -71,7 +68,7 @@ def _row_to_post(row: Tag) -> Post | None:
     if not isinstance(href, str) or not href:
         return None
 
-    post_id = _extract_post_id(href)
+    post_id = extract_post_id(href)
     if post_id is None:
         return None
 
@@ -101,10 +98,37 @@ def _row_to_post(row: Tag) -> Post | None:
     )
 
 
-def _extract_post_id(href: str) -> int | None:
-    m = _ARTCL_ID_RE.search(href)
+# Matches /bbs/<board>/<menu>/<post_id>/artclView.do — used as the primary path pattern.
+_ARTCL_ID_RE = re.compile(r"/bbs/[^/]+/[^/]+/(\d+)/artclView")
+
+
+def extract_post_id(url: str) -> int | None:
+    """Extract a positive post ID from a URL, or return None.
+
+    Tries query-string keys first, then the specific artclView path pattern,
+    then a generic 3+-digit path segment as a last resort.
+    Returns None if no ID is found or if the ID is <= 0.
+    """
+    parsed = urlparse(url)
+    qs = parse_qs(parsed.query)
+    for key in ("articleNo", "article_no", "artclNo", "artcl_no", "no"):
+        if key in qs:
+            try:
+                value = int(qs[key][0])
+            except (ValueError, IndexError):
+                continue
+            if value > 0:
+                return value
+    m = _ARTCL_ID_RE.search(parsed.path)
     if m:
-        return int(m.group(1))
+        value = int(m.group(1))
+        # Matched the artclView pattern — return the ID or None; do not fall through.
+        return value if value > 0 else None
+    m = re.search(r"/(\d{4,})/", parsed.path)
+    if m:
+        value = int(m.group(1))
+        if value > 0:
+            return value
     return None
 
 
