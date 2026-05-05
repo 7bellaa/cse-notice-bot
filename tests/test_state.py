@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from cse_bot.models import BoardState
+from cse_bot.models import BoardState, TrackedDeadline
 from cse_bot.state import load_state, save_state
 
 
@@ -71,3 +71,45 @@ def test_save_state_rejects_non_monotonic_watermark(tmp_path: Path) -> None:
         save_state(
             path, {"14221": BoardState(last_max_post_id=5, last_checked="t")}
         )
+
+
+def test_state_roundtrip_with_deadlines(tmp_path: Path):
+    p = tmp_path / "s.json"
+    s = {
+        "14221": BoardState(
+            last_max_post_id=100,
+            last_checked="2026-05-06T09:00:00+09:00",
+            empty_streak=0,
+            deadlines=[
+                TrackedDeadline(
+                    post_id=42, title="t", url="https://x",
+                    date="2026-05-14", reminded=False,
+                )
+            ],
+        ),
+    }
+    save_state(p, s)
+    loaded = load_state(p)
+    assert loaded["14221"].deadlines == s["14221"].deadlines
+
+
+def test_state_load_legacy_without_deadlines_field(tmp_path: Path):
+    p = tmp_path / "s.json"
+    p.write_text(
+        '{"boards":{"14221":{"last_max_post_id":100,"last_checked":"x","empty_streak":0}}}',
+        encoding="utf-8",
+    )
+    loaded = load_state(p)
+    assert loaded["14221"].deadlines == []
+
+
+def test_state_save_omits_deadlines_when_empty_list_is_fine(tmp_path: Path):
+    """Empty deadlines list is still persisted, just as []."""
+    p = tmp_path / "s.json"
+    save_state(p, {
+        "14221": BoardState(
+            last_max_post_id=1, last_checked="x", empty_streak=0, deadlines=[]
+        )
+    })
+    data = json.loads(p.read_text(encoding="utf-8"))
+    assert data["boards"]["14221"]["deadlines"] == []

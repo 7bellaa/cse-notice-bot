@@ -1,7 +1,7 @@
 """Data classes used across the bot."""
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass(frozen=True)
@@ -25,7 +25,17 @@ class BoardConfig:
 
 
 @dataclass
+class TrackedDeadline:
+    post_id: int
+    title: str
+    url: str
+    date: str        # ISO YYYY-MM-DD
+    reminded: bool = False
+
+
+@dataclass
 class BoardState:
     last_max_post_id: int | None
     last_checked: str
     empty_streak: int = 0
+    deadlines: list[TrackedDeadline] = field(default_factory=list)

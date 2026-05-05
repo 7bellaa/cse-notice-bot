@@ -20,7 +20,7 @@ import shutil
 import time
 from pathlib import Path
 
-from cse_bot.models import BoardState
+from cse_bot.models import BoardState, TrackedDeadline
 
 log = logging.getLogger(__name__)
 
@@ -48,10 +48,22 @@ def load_state(path: Path) -> BoardStateMap:
     for board_id, entry in boards.items():
         if not isinstance(entry, dict):
             continue
+        deadlines_raw = entry.get("deadlines", [])
+        deadlines = [
+            TrackedDeadline(
+                post_id=int(d["post_id"]),
+                title=str(d["title"]),
+                url=str(d["url"]),
+                date=str(d["date"]),
+                reminded=bool(d.get("reminded", False)),
+            )
+            for d in deadlines_raw
+        ]
         result[board_id] = BoardState(
             last_max_post_id=entry.get("last_max_post_id"),
             last_checked=entry.get("last_checked", ""),
             empty_streak=int(entry.get("empty_streak", 0)),
+            deadlines=deadlines,
         )
     return result
 
@@ -80,6 +92,16 @@ def save_state(path: Path, state: BoardStateMap) -> None:
                 "last_max_post_id": s.last_max_post_id,
                 "last_checked": s.last_checked,
                 "empty_streak": s.empty_streak,
+                "deadlines": [
+                    {
+                        "post_id": d.post_id,
+                        "title": d.title,
+                        "url": d.url,
+                        "date": d.date,
+                        "reminded": d.reminded,
+                    }
+                    for d in s.deadlines
+                ],
             }
             for board_id, s in state.items()
         }
