@@ -50,17 +50,23 @@ http_retries = 2
 format = "medium"
 self_alert_webhook_env = "WH_ALERT"
 
+[gemini]
+api_key_env = "GEMINI_API_KEY"
+model = "gemini-2.5-flash-lite"
+timeout_seconds = 10
+
 [[boards]]
 id = "14221"
 name = "일반공지"
 url = "{BOARD_URL}"
-webhook_env = "WH_GEN"
+webhook_envs = ["WH_GEN"]
 enabled = true
 """,
         encoding="utf-8",
     )
     monkeypatch.setenv("WH_GEN", WEBHOOK)
     monkeypatch.setenv("WH_ALERT", ALERT)
+    monkeypatch.setenv("GEMINI_API_KEY", "test-key")
     return cfg
 
 
@@ -104,6 +110,10 @@ def test_new_posts_are_notified_in_ascending_order(
             200, text=_html_with_posts([19237, 19236, 19235, 19234, 19233])
         )
     )
+    # article fetch returns 404 (no body) — summarizer skipped, notification still sent
+    respx.get(host="cse.pusan.ac.kr", path__startswith="/cse/14221/artclView.do").mock(
+        return_value=httpx.Response(404)
+    )
     notify_route = respx.post(WEBHOOK).mock(return_value=httpx.Response(204))
 
     exit_code = run_cycle(cfg_file)
@@ -143,6 +153,10 @@ def test_partial_failure_preserves_progress(cfg_file: Path, tmp_path: Path) -> N
             200, text=_html_with_posts([19236, 19235, 19234])
         )
     )
+    # article fetch returns 404 (no body) — summarizer skipped
+    respx.get(host="cse.pusan.ac.kr", path__startswith="/cse/14221/artclView.do").mock(
+        return_value=httpx.Response(404)
+    )
     # First notify (id 19235) succeeds, second (19236) fails terminally with 404.
     respx.post(WEBHOOK).mock(
         side_effect=[httpx.Response(204), httpx.Response(404)]
@@ -181,6 +195,8 @@ def test_page_2_fetched_when_first_page_all_new(
     page2_ids = list(range(19180, 19200))  # 20 posts, partly above watermark
 
     def handler(request: httpx.Request) -> httpx.Response:
+        if "artclView" in request.url.path:
+            return httpx.Response(404)  # article fetch → no body, no summary
         page = request.url.params.get("page", "1")
         if page == "2":
             return httpx.Response(200, text=_html_with_posts(page2_ids))

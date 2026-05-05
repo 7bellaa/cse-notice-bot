@@ -1,7 +1,6 @@
 from pathlib import Path
 
 import httpx
-import pytest
 import respx
 
 from cse_bot.article import extract_body, fetch_article_body

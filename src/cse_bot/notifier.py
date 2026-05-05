@@ -52,10 +52,7 @@ def format_message(post: Post, fmt: Format, summary: str | None = None) -> str:
     else:
         raise ValueError(f"unknown format: {fmt}")
 
-    if summary:
-        msg = f"{base}\n📝 요약:\n{summary}"
-    else:
-        msg = base
+    msg = f"{base}\n📝 요약:\n{summary}" if summary else base
 
     if len(msg) > DISCORD_MAX:
         msg = msg[: DISCORD_MAX - 1] + "…"

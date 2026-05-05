@@ -221,8 +221,9 @@ def test_load_config_missing_gemini_key_env(tmp_path, monkeypatch):
         'webhook_envs = ["DISCORD_WEBHOOK_A"]\n',
         encoding="utf-8",
     )
-    from cse_bot.config import ConfigError, load_config
     import pytest
+
+    from cse_bot.config import ConfigError, load_config
     with pytest.raises(ConfigError):
         load_config(cfg_path)
 
@@ -271,7 +272,8 @@ def test_load_config_rejects_empty_webhook_envs(tmp_path, monkeypatch):
         'id = "1"\nname = "n"\nurl = "https://x"\nwebhook_envs = []\n',
         encoding="utf-8",
     )
-    from cse_bot.config import ConfigError, load_config
     import pytest
+
+    from cse_bot.config import ConfigError, load_config
     with pytest.raises(ConfigError):
         load_config(cfg_path)

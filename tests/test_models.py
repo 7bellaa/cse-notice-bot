@@ -35,7 +35,7 @@ def test_board_config_defaults_enabled() -> None:
         id="14221",
         name="일반공지",
         url="https://cse.pusan.ac.kr/cse/14221/subview.do",
-        webhook_env="DISCORD_WEBHOOK_GENERAL",
+        webhook_envs=["DISCORD_WEBHOOK_GENERAL"],
     )
     assert cfg.enabled is True
 

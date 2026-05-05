@@ -9,7 +9,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
-from cse_bot import differ, fetcher, notifier, parser, state
+from cse_bot import article, differ, fetcher, notifier, parser, state, summarizer
 from cse_bot.config import Config, ConfigError, load_config
 from cse_bot.logging_setup import configure_logging
 from cse_bot.models import BoardConfig, BoardState, Post
@@ -121,19 +121,56 @@ def _process_board(
         len(new_posts),
     )
 
-    webhook_url = cfg.webhook_url(board.id)
+    webhook_urls = cfg.webhook_urls(board.id)
     for post in new_posts:
-        notifier.send(
+        body = article.fetch_article_body(
+            post.url,
+            timeout=cfg.general.http_timeout_seconds,
+            retries=cfg.general.http_retries,
+        )
+        summary = (
+            summarizer.summarize(
+                body,
+                api_key=cfg.gemini.api_key,
+                model=cfg.gemini.model,
+                timeout=cfg.gemini.timeout_seconds,
+            )
+            if body
+            else None
+        )
+
+        ok_count, failed_urls = notifier.send_to_webhooks(
             post,
-            webhook_url=webhook_url,
+            webhook_urls=webhook_urls,
+            summary=summary,
             fmt=cfg.notification.format,
             timeout=cfg.general.http_timeout_seconds,
             retries=cfg.general.http_retries,
         )
+
+        if ok_count == 0:
+            raise notifier.NotifyError(
+                f"all webhooks failed for post {post.id}"
+            )
+        if failed_urls:
+            _safe_alert(
+                cfg,
+                f"post {post.id}: {len(failed_urls)}/"
+                f"{ok_count + len(failed_urls)} webhooks failed",
+            )
+
         board_state.last_max_post_id = post.id
         state_map[board.id] = board_state
         state.save_state(state_path, state_map)
-        log.info("notify.ok board=%s post_id=%d", board.id, post.id)
+        log.info(
+            "notify.ok board=%s post_id=%d webhooks_ok=%d webhooks_failed=%d "
+            "summary=%s",
+            board.id,
+            post.id,
+            ok_count,
+            len(failed_urls),
+            "yes" if summary else "no",
+        )
 
     board_state.last_checked = _now_iso()
     state_map[board.id] = board_state
