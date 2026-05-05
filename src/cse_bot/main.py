@@ -5,17 +5,19 @@ import argparse
 import logging
 import os
 import sys
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from pathlib import Path
 from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
+from zoneinfo import ZoneInfo
 
-from cse_bot import article, differ, fetcher, notifier, parser, state, summarizer
+from cse_bot import article, differ, fetcher, notifier, parser, reminder, state, summarizer
 from cse_bot.config import Config, ConfigError, load_config
 from cse_bot.logging_setup import configure_logging
-from cse_bot.models import BoardConfig, BoardState, Post
+from cse_bot.models import BoardConfig, BoardState, Post, TrackedDeadline
 
 log = logging.getLogger("cse_bot.main")
 
+KST = ZoneInfo("Asia/Seoul")
 EMPTY_STREAK_ALERT_THRESHOLD = 3
 
 
@@ -74,6 +76,38 @@ def run_cycle(config_path: Path) -> int:
             log.exception("board.failed id=%s err=%s", board.id, e)
             _safe_alert(cfg, f"board {board.id} failed: {e}")
 
+    # Deadline reminders: prune expired, then send any D-1 reminders for today.
+    today = datetime.now(KST).date()
+    pruned = reminder.prune_expired(state_map, today=today)
+    if pruned:
+        log.info("deadlines.pruned count=%d", pruned)
+    due = reminder.collect_due_reminders(state_map, today=today)
+    for board_id, deadline in due:
+        try:
+            urls = cfg.webhook_urls(board_id)
+        except ConfigError:
+            log.warning("reminder.no_webhooks board=%s", board_id)
+            continue
+        msg = reminder.format_reminder(deadline)
+        ok, failed = notifier.send_alert_to_webhooks(
+            msg,
+            webhook_urls=urls,
+            timeout=cfg.general.http_timeout_seconds,
+            retries=cfg.general.http_retries,
+        )
+        if ok > 0:
+            deadline.reminded = True
+            log.info(
+                "reminder.sent board=%s post_id=%d webhooks_ok=%d webhooks_failed=%d",
+                board_id, deadline.post_id, ok, len(failed),
+            )
+        if failed:
+            _safe_alert(
+                cfg,
+                f"reminder for post {deadline.post_id}: "
+                f"{len(failed)}/{ok + len(failed)} webhooks failed",
+            )
+
     state.save_state(state_path, state_map)
     log.info("cycle.end ok=%s", overall_ok)
     return 0 if overall_ok else 2
@@ -122,22 +156,28 @@ def _process_board(
     )
 
     webhook_urls = cfg.webhook_urls(board.id)
+    today = datetime.now(KST).date()
+
     for post in new_posts:
-        body = article.fetch_article_body(
+        content = article.fetch_article_content(
             post.url,
             timeout=cfg.general.http_timeout_seconds,
             retries=cfg.general.http_retries,
         )
-        summary = (
+        body = content.body if content else ""
+        images = content.image_urls if content else []
+        result = (
             summarizer.summarize(
                 body,
+                image_urls=images,
                 api_key=cfg.gemini.api_key,
                 model=cfg.gemini.model,
                 timeout=cfg.gemini.timeout_seconds,
             )
-            if body
+            if (body or images)
             else None
         )
+        summary = result.summary if result else None
 
         ok_count, failed_urls = notifier.send_to_webhooks(
             post,
@@ -147,7 +187,6 @@ def _process_board(
             timeout=cfg.general.http_timeout_seconds,
             retries=cfg.general.http_retries,
         )
-
         if ok_count == 0:
             raise notifier.NotifyError(
                 f"all webhooks failed for post {post.id}"
@@ -159,17 +198,31 @@ def _process_board(
                 f"{ok_count + len(failed_urls)} webhooks failed",
             )
 
+        if result and result.deadline:
+            try:
+                d_date = date.fromisoformat(result.deadline)
+                if d_date > today:
+                    board_state.deadlines.append(
+                        TrackedDeadline(
+                            post_id=post.id, title=post.title, url=post.url,
+                            date=result.deadline, reminded=False,
+                        )
+                    )
+            except ValueError:
+                log.warning(
+                    "deadline.invalid_format post_id=%d raw=%r",
+                    post.id, result.deadline,
+                )
+
         board_state.last_max_post_id = post.id
         state_map[board.id] = board_state
         state.save_state(state_path, state_map)
         log.info(
             "notify.ok board=%s post_id=%d webhooks_ok=%d webhooks_failed=%d "
-            "summary=%s",
-            board.id,
-            post.id,
-            ok_count,
-            len(failed_urls),
+            "summary=%s deadline=%s",
+            board.id, post.id, ok_count, len(failed_urls),
             "yes" if summary else "no",
+            result.deadline if (result and result.deadline) else "no",
         )
 
     board_state.last_checked = _now_iso()
