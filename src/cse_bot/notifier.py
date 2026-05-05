@@ -30,23 +30,36 @@ class _RetryableNotifyError(Exception):
     pass
 
 
-def format_message(post: Post, fmt: Format) -> str:
+DISCORD_MAX = 2000
+
+
+def format_message(post: Post, fmt: Format, summary: str | None = None) -> str:
     if fmt == "minimal":
-        return f"📢 **새 공지: {post.title}**\n🔗 {post.url}"
-    if fmt == "medium":
-        return (
+        base = f"📢 **새 공지: {post.title}**\n🔗 {post.url}"
+    elif fmt == "medium":
+        base = (
             f"📢 **새 공지: {post.title}**\n"
             f"✍️ {post.author} · 📅 {post.date}\n"
             f"🔗 {post.url}"
         )
-    if fmt == "detailed":
+    elif fmt == "detailed":
         attached = "첨부 있음" if post.has_attachment else "첨부 없음"
-        return (
+        base = (
             f"📢 **새 공지: {post.title}**  `[{post.category}]`\n"
             f"✍️ {post.author} · 📅 {post.date} · 📎 {attached}\n"
             f"🔗 {post.url}"
         )
-    raise ValueError(f"unknown format: {fmt}")
+    else:
+        raise ValueError(f"unknown format: {fmt}")
+
+    if summary:
+        msg = f"{base}\n📝 요약:\n{summary}"
+    else:
+        msg = base
+
+    if len(msg) > DISCORD_MAX:
+        msg = msg[: DISCORD_MAX - 1] + "…"
+    return msg
 
 
 def send(
@@ -56,9 +69,10 @@ def send(
     fmt: Format,
     timeout: float,
     retries: int,
+    summary: str | None = None,
 ) -> None:
     """POST a notification to the Discord webhook. Raises NotifyError on terminal failure."""
-    content = format_message(post, fmt)
+    content = format_message(post, fmt, summary=summary)
     payload = {"content": content}
 
     @retry(
@@ -92,6 +106,38 @@ def send(
         raise NotifyError(f"retries exhausted: {e}") from e
     except RetryError as e:
         raise NotifyError(f"retries exhausted: {e}") from e
+
+
+def send_to_webhooks(
+    post: Post,
+    *,
+    webhook_urls: list[str],
+    summary: str | None,
+    fmt: Format,
+    timeout: float,
+    retries: int,
+) -> tuple[int, list[str]]:
+    """Sequentially POST to each webhook. Returns (success_count, failed_urls).
+
+    Each webhook is independent — one failure does not abort the others.
+    """
+    ok = 0
+    failed: list[str] = []
+    for url in webhook_urls:
+        try:
+            send(
+                post,
+                webhook_url=url,
+                fmt=fmt,
+                timeout=timeout,
+                retries=retries,
+                summary=summary,
+            )
+            ok += 1
+        except NotifyError as e:
+            log.warning("send_to_webhooks.failed url=%s err=%s", url, e)
+            failed.append(url)
+    return ok, failed
 
 
 def send_alert(message: str, *, webhook_url: str, timeout: float = 5.0) -> None:

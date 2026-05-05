@@ -6,7 +6,12 @@ import pytest
 import respx
 
 from cse_bot.models import Post
-from cse_bot.notifier import NotifyError, format_message, send
+from cse_bot.notifier import (
+    NotifyError,
+    format_message,
+    send,
+    send_to_webhooks,
+)
 
 WEBHOOK = "https://discord.com/api/webhooks/123/abc"
 
@@ -70,3 +75,72 @@ def test_send_raises_after_5xx_retries_exhausted() -> None:
     respx.post(WEBHOOK).mock(return_value=httpx.Response(500))
     with pytest.raises(NotifyError):
         send(_post(), webhook_url=WEBHOOK, fmt="medium", timeout=5.0, retries=3)
+
+
+def _post2() -> Post:
+    return Post(
+        id=1, title="t", author="a", date="2026-05-06",
+        url="https://x", category="c", has_attachment=False,
+    )
+
+
+def test_format_message_appends_summary_block_when_present():
+    msg = format_message(_post2(), "medium", summary="- bullet 1\n- bullet 2")
+    assert "📝 요약" in msg
+    assert "- bullet 1" in msg
+    assert "- bullet 2" in msg
+
+
+def test_format_message_omits_summary_block_when_none():
+    msg = format_message(_post2(), "medium", summary=None)
+    assert "📝 요약" not in msg
+
+
+def test_format_message_omits_summary_block_when_empty_string():
+    msg = format_message(_post2(), "medium", summary="")
+    assert "📝 요약" not in msg
+
+
+def test_format_message_truncates_when_exceeds_discord_limit():
+    huge = "x" * 5000
+    msg = format_message(_post2(), "medium", summary=huge)
+    assert len(msg) <= 2000
+
+
+@respx.mock
+def test_send_to_webhooks_all_success():
+    respx.post("https://a").mock(return_value=httpx.Response(204))
+    respx.post("https://b").mock(return_value=httpx.Response(204))
+    ok, failed = send_to_webhooks(
+        _post2(),
+        webhook_urls=["https://a", "https://b"],
+        summary=None, fmt="medium", timeout=2.0, retries=1,
+    )
+    assert ok == 2
+    assert failed == []
+
+
+@respx.mock
+def test_send_to_webhooks_partial_failure():
+    respx.post("https://a").mock(return_value=httpx.Response(204))
+    respx.post("https://b").mock(return_value=httpx.Response(403))
+    ok, failed = send_to_webhooks(
+        _post2(),
+        webhook_urls=["https://a", "https://b"],
+        summary=None, fmt="medium", timeout=2.0, retries=1,
+    )
+    assert ok == 1
+    assert failed == ["https://b"]
+
+
+@respx.mock
+def test_send_to_webhooks_all_failure():
+    respx.post("https://a").mock(return_value=httpx.Response(403))
+    respx.post("https://b").mock(return_value=httpx.Response(403))
+    ok, failed = send_to_webhooks(
+        _post2(),
+        webhook_urls=["https://a", "https://b"],
+        summary=None, fmt="medium", timeout=2.0, retries=1,
+    )
+    assert ok == 0
+    assert sorted(failed) == ["https://a", "https://b"]
