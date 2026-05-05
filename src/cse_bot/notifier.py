@@ -137,6 +137,53 @@ def send_to_webhooks(
     return ok, failed
 
 
+def send_alert_to_webhooks(
+    content: str,
+    *,
+    webhook_urls: list[str],
+    timeout: float,
+    retries: int,
+) -> tuple[int, list[str]]:
+    """POST a plain content message to each webhook (no Post envelope).
+
+    Used for deadline reminders and other non-post notifications. Sequential,
+    best-effort. Returns (success_count, failed_urls).
+    """
+    if len(content) > DISCORD_MAX:
+        content = content[: DISCORD_MAX - 1] + "…"
+    payload = {"content": content}
+    ok = 0
+    failed: list[str] = []
+    for url in webhook_urls:
+        attempts = max(1, retries)
+        success = False
+        for i in range(attempts):
+            try:
+                with httpx.Client(timeout=timeout) as client:
+                    resp = client.post(
+                        url, json=payload, headers={"User-Agent": USER_AGENT},
+                    )
+            except httpx.HTTPError as e:
+                log.warning("alert_to.network url=%s err=%s", url, e)
+                if i == attempts - 1:
+                    break
+                continue
+            if resp.status_code in (429,) or 500 <= resp.status_code < 600:
+                if i == attempts - 1:
+                    break
+                continue
+            if resp.status_code >= 400:
+                log.warning("alert_to.client_error url=%s status=%d", url, resp.status_code)
+                break
+            success = True
+            break
+        if success:
+            ok += 1
+        else:
+            failed.append(url)
+    return ok, failed
+
+
 def send_alert(message: str, *, webhook_url: str, timeout: float = 5.0) -> None:
     """Best-effort alert to the self-alert webhook. Never raises."""
     try:

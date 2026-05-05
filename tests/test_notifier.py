@@ -10,6 +10,7 @@ from cse_bot.notifier import (
     NotifyError,
     format_message,
     send,
+    send_alert_to_webhooks,
     send_to_webhooks,
 )
 
@@ -144,3 +145,42 @@ def test_send_to_webhooks_all_failure():
     )
     assert ok == 0
     assert sorted(failed) == ["https://a", "https://b"]
+
+
+@respx.mock
+def test_send_alert_to_webhooks_all_success():
+    respx.post("https://a").mock(return_value=httpx.Response(204))
+    respx.post("https://b").mock(return_value=httpx.Response(204))
+    ok, failed = send_alert_to_webhooks(
+        "⏰ 내일 마감: t",
+        webhook_urls=["https://a", "https://b"],
+        timeout=2.0, retries=1,
+    )
+    assert ok == 2 and failed == []
+
+
+@respx.mock
+def test_send_alert_to_webhooks_partial_failure():
+    respx.post("https://a").mock(return_value=httpx.Response(204))
+    respx.post("https://b").mock(return_value=httpx.Response(403))
+    ok, failed = send_alert_to_webhooks(
+        "msg",
+        webhook_urls=["https://a", "https://b"],
+        timeout=2.0, retries=1,
+    )
+    assert ok == 1 and failed == ["https://b"]
+
+
+@respx.mock
+def test_send_alert_to_webhooks_truncates_long_content():
+    captured: dict = {}
+
+    def _cap(request: httpx.Request) -> httpx.Response:
+        import json
+        captured["json"] = json.loads(request.content)
+        return httpx.Response(204)
+
+    respx.post("https://a").mock(side_effect=_cap)
+    huge = "x" * 5000
+    send_alert_to_webhooks(huge, webhook_urls=["https://a"], timeout=2.0, retries=1)
+    assert len(captured["json"]["content"]) <= 2000
