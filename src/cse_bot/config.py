@@ -36,10 +36,10 @@ class Config:
     general: GeneralConfig
     notification: NotificationConfig
     boards: list[BoardConfig]
-    _webhook_urls: dict[str, str]
+    _webhook_urls: dict[str, list[str]]
     alert_webhook_url: str
 
-    def webhook_url(self, board_id: str) -> str:
+    def webhook_urls(self, board_id: str) -> list[str]:
         try:
             return self._webhook_urls[board_id]
         except KeyError as e:
@@ -55,16 +55,19 @@ def load_config(path: Path) -> Config:
     notification = _load_notification(raw)
     boards = _load_boards(raw)
 
-    webhook_urls: dict[str, str] = {}
+    webhook_urls: dict[str, list[str]] = {}
     for b in boards:
         if not b.enabled:
             continue
-        url = os.environ.get(b.webhook_env)
-        if not url:
-            raise ConfigError(
-                f"environment variable {b.webhook_env} is required for board {b.id}"
-            )
-        webhook_urls[b.id] = url
+        urls: list[str] = []
+        for env_name in b.webhook_envs:
+            url = os.environ.get(env_name)
+            if not url:
+                raise ConfigError(
+                    f"environment variable {env_name} is required for board {b.id}"
+                )
+            urls.append(url)
+        webhook_urls[b.id] = urls
 
     alert_env = notification.self_alert_webhook_env
     alert_url = os.environ.get(alert_env)
@@ -114,12 +117,20 @@ def _load_boards(raw: dict[str, Any]) -> list[BoardConfig]:
     boards: list[BoardConfig] = []
     for i, b in enumerate(items):
         try:
+            envs = b["webhook_envs"]
+        except KeyError as e:
+            raise ConfigError(f"[[boards]] index {i}: missing key {e.args[0]}") from e
+        if not isinstance(envs, list) or not all(isinstance(x, str) for x in envs):
+            raise ConfigError(f"[[boards]] index {i}: webhook_envs must be a list of strings")
+        if not envs:
+            raise ConfigError(f"[[boards]] index {i}: webhook_envs must not be empty")
+        try:
             boards.append(
                 BoardConfig(
                     id=str(b["id"]),
                     name=str(b["name"]),
                     url=str(b["url"]),
-                    webhook_env=str(b["webhook_env"]),
+                    webhook_envs=list(envs),
                     enabled=bool(b.get("enabled", True)),
                 )
             )

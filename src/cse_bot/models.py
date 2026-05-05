@@ -20,7 +20,7 @@ class BoardConfig:
     id: str
     name: str
     url: str
-    webhook_env: str
+    webhook_envs: list[str]
     enabled: bool = True
 
 
