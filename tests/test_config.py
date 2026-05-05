@@ -174,6 +174,59 @@ enabled = false
     assert cfg.boards[0].enabled is False
 
 
+def test_load_config_parses_gemini_section(tmp_path, monkeypatch):
+    monkeypatch.setenv("DISCORD_WEBHOOK_A", "https://a")
+    monkeypatch.setenv("DISCORD_WEBHOOK_ALERT", "https://alert")
+    monkeypatch.setenv("MY_GEMINI", "secret-key")
+    cfg_path = tmp_path / "c.toml"
+    cfg_path.write_text(
+        '[general]\n'
+        'log_dir = "logs"\nstate_file = "data/state.json"\n'
+        'max_pages = 1\nhttp_timeout_seconds = 5\nhttp_retries = 1\n'
+        '[notification]\n'
+        'format = "medium"\nself_alert_webhook_env = "DISCORD_WEBHOOK_ALERT"\n'
+        '[gemini]\n'
+        'api_key_env = "MY_GEMINI"\n'
+        'model = "gemini-2.5-flash-lite"\n'
+        'timeout_seconds = 8\n'
+        '[[boards]]\n'
+        'id = "1"\nname = "n"\nurl = "https://x"\n'
+        'webhook_envs = ["DISCORD_WEBHOOK_A"]\n',
+        encoding="utf-8",
+    )
+    from cse_bot.config import load_config
+    cfg = load_config(cfg_path)
+    assert cfg.gemini.api_key == "secret-key"
+    assert cfg.gemini.model == "gemini-2.5-flash-lite"
+    assert cfg.gemini.timeout_seconds == 8
+
+
+def test_load_config_missing_gemini_key_env(tmp_path, monkeypatch):
+    monkeypatch.setenv("DISCORD_WEBHOOK_A", "https://a")
+    monkeypatch.setenv("DISCORD_WEBHOOK_ALERT", "https://alert")
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    cfg_path = tmp_path / "c.toml"
+    cfg_path.write_text(
+        '[general]\n'
+        'log_dir = "logs"\nstate_file = "data/state.json"\n'
+        'max_pages = 1\nhttp_timeout_seconds = 5\nhttp_retries = 1\n'
+        '[notification]\n'
+        'format = "medium"\nself_alert_webhook_env = "DISCORD_WEBHOOK_ALERT"\n'
+        '[gemini]\n'
+        'api_key_env = "GEMINI_API_KEY"\n'
+        'model = "gemini-2.5-flash-lite"\n'
+        'timeout_seconds = 10\n'
+        '[[boards]]\n'
+        'id = "1"\nname = "n"\nurl = "https://x"\n'
+        'webhook_envs = ["DISCORD_WEBHOOK_A"]\n',
+        encoding="utf-8",
+    )
+    from cse_bot.config import ConfigError, load_config
+    import pytest
+    with pytest.raises(ConfigError):
+        load_config(cfg_path)
+
+
 def test_load_config_accepts_webhook_envs_list(tmp_path, monkeypatch):
     monkeypatch.setenv("DISCORD_WEBHOOK_A", "https://a")
     monkeypatch.setenv("DISCORD_WEBHOOK_B", "https://b")

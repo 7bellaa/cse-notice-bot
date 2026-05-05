@@ -9,6 +9,11 @@ http_retries = 3
 format = "medium"
 self_alert_webhook_env = "DISCORD_WEBHOOK_ALERT"
 
+[gemini]
+api_key_env = "GEMINI_API_KEY"
+model = "gemini-2.5-flash-lite"
+timeout_seconds = 10
+
 [[boards]]
 id = "14221"
 name = "정컴 일반공지"

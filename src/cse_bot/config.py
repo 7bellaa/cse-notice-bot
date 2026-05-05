@@ -32,9 +32,17 @@ class NotificationConfig:
 
 
 @dataclass(frozen=True)
+class GeminiConfig:
+    api_key: str
+    model: str
+    timeout_seconds: float
+
+
+@dataclass(frozen=True)
 class Config:
     general: GeneralConfig
     notification: NotificationConfig
+    gemini: GeminiConfig
     boards: list[BoardConfig]
     _webhook_urls: dict[str, list[str]]
     alert_webhook_url: str
@@ -53,6 +61,7 @@ def load_config(path: Path) -> Config:
 
     general = _load_general(raw)
     notification = _load_notification(raw)
+    gemini = _load_gemini(raw)
     boards = _load_boards(raw)
 
     webhook_urls: dict[str, list[str]] = {}
@@ -77,6 +86,7 @@ def load_config(path: Path) -> Config:
     return Config(
         general=general,
         notification=notification,
+        gemini=gemini,
         boards=boards,
         _webhook_urls=webhook_urls,
         alert_webhook_url=alert_url,
@@ -137,3 +147,19 @@ def _load_boards(raw: dict[str, Any]) -> list[BoardConfig]:
         except KeyError as e:
             raise ConfigError(f"[[boards]] index {i}: missing key {e.args[0]}") from e
     return boards
+
+
+def _load_gemini(raw: dict[str, Any]) -> GeminiConfig:
+    g: dict[str, Any] = raw.get("gemini") or {}
+    if not g:
+        raise ConfigError("[gemini] section is required")
+    try:
+        api_key_env = str(g["api_key_env"])
+        model = str(g["model"])
+        timeout = float(g["timeout_seconds"])
+    except KeyError as e:
+        raise ConfigError(f"missing [gemini] key: {e.args[0]}") from e
+    api_key = os.environ.get(api_key_env)
+    if not api_key:
+        raise ConfigError(f"environment variable {api_key_env} is required (gemini)")
+    return GeminiConfig(api_key=api_key, model=model, timeout_seconds=timeout)
