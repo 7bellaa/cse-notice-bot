@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>PNU CSE 마감 캘린더</title>
   <link rel="stylesheet" href="./style.css" />
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
@@ -12,7 +12,8 @@
   <header class="site-head">
     <div class="brand">
       📅 PNU CSE 마감 캘린더
-      <div class="brand-subtitle">각 일정은 해당 날짜에 마감되는 공지입니다 (공지 게시일 아님)</div>
+      <div class="brand-subtitle brand-subtitle--full">각 일정은 해당 날짜에 마감되는 공지입니다 (공지 게시일 아님)</div>
+      <div class="brand-subtitle brand-subtitle--short">마감일 기준 캘린더입니다.<button class="info-pop" type="button" aria-label="자세히 보기" data-info-toggle>ⓘ</button></div>
     </div>
     <div class="meta">
       <span id="event-count" class="badge">…건 마감 예정</span>
@@ -59,6 +60,20 @@
 
     <div id="calendar"></div>
   </main>
+
+  <!-- Mobile Bottom Sheet (MOB-2) -->
+  <div id="day-sheet-backdrop" class="day-sheet__backdrop" data-close-sheet></div>
+  <aside id="day-sheet" class="day-sheet" role="dialog" aria-modal="true" aria-labelledby="day-sheet-title" hidden>
+    <div class="day-sheet__handle" aria-hidden="true"></div>
+    <header class="day-sheet__header">
+      <span id="day-sheet-title">날짜</span>
+      <button class="modal-close" type="button" data-close-sheet aria-label="닫기">×</button>
+    </header>
+    <div id="day-sheet-list" class="day-sheet__list"></div>
+  </aside>
+
+  <!-- Mobile hint toast (MOB-2) -->
+  <div id="mobile-toast" class="mobile-toast" role="status" aria-live="polite" hidden></div>
 
   <!-- Event detail modal -->
   <div id="modal" class="modal" hidden>
@@ -239,6 +254,156 @@
         if (e.key === "Escape") hideTooltip();
       });
 
+      // ─── Mobile Bottom Sheet (MOB-2) ────────────────────────────
+      const daySheet = document.getElementById("day-sheet");
+      const daySheetBackdrop = document.getElementById("day-sheet-backdrop");
+      const daySheetTitle = document.getElementById("day-sheet-title");
+      const daySheetList = document.getElementById("day-sheet-list");
+
+      function formatKoreanDate(iso) {
+        const d = new Date(iso);
+        return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`;
+      }
+
+      function openDaySheet(dateStr, events) {
+        daySheetTitle.textContent = formatKoreanDate(dateStr);
+        daySheetList.innerHTML = "";
+        if (events.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "day-sheet__empty";
+          empty.textContent = "이 날짜에 마감 일정이 없습니다.";
+          daySheetList.appendChild(empty);
+        } else {
+          events.forEach((ev) => {
+            const cat = ev.extendedProps.category || "일반공지";
+            const meta = metaFor(cat);
+            const important = !!ev.extendedProps.important;
+            const stripped = stripPrefix(ev.title);
+            const item = document.createElement("a");
+            item.className = "day-sheet__item";
+            item.href = ev.url || "#";
+            item.target = "_blank";
+            item.rel = "noopener";
+            item.setAttribute("data-category", meta.key);
+            const head = document.createElement("div");
+            head.className = "day-sheet__item-head";
+            const tag = document.createElement("span");
+            tag.className = "chip-tag";
+            tag.textContent = meta.short;
+            head.appendChild(tag);
+            const tagInfo = dTag(ev.startStr);
+            const dn = document.createElement("span");
+            dn.className = `d-tag ${tagInfo.className}`;
+            dn.textContent = tagInfo.text;
+            head.appendChild(dn);
+            item.appendChild(head);
+            const title = document.createElement("span");
+            title.className = "day-sheet__item-title";
+            title.textContent = (important ? "★ " : "") + stripped;
+            item.appendChild(title);
+            daySheetList.appendChild(item);
+          });
+        }
+        daySheet.hidden = false;
+        daySheetBackdrop.dataset.open = "true";
+        requestAnimationFrame(() => { daySheet.dataset.open = "true"; });
+        document.body.style.overflow = "hidden";
+      }
+
+      function closeDaySheet() {
+        daySheet.dataset.open = "false";
+        daySheetBackdrop.dataset.open = "false";
+        setTimeout(() => { daySheet.hidden = true; }, 240);
+        document.body.style.overflow = "";
+      }
+
+      document.addEventListener("click", (e) => {
+        if (e.target.matches("[data-close-sheet]")) closeDaySheet();
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && daySheet.dataset.open === "true") closeDaySheet();
+      });
+
+      // Swipe-down to close
+      let touchStartY = null;
+      daySheet.addEventListener("touchstart", (e) => {
+        touchStartY = e.touches[0].clientY;
+      }, { passive: true });
+      daySheet.addEventListener("touchmove", (e) => {
+        if (touchStartY === null) return;
+        const dy = e.touches[0].clientY - touchStartY;
+        if (dy > 0) daySheet.style.transform = `translateY(${dy}px)`;
+      }, { passive: true });
+      daySheet.addEventListener("touchend", (e) => {
+        if (touchStartY === null) return;
+        const dy = e.changedTouches[0].clientY - touchStartY;
+        daySheet.style.transform = "";
+        if (dy > 80) closeDaySheet();
+        touchStartY = null;
+      });
+
+      // ─── Mobile hint toast (MOB-2 risk mitigation) ──────────────
+      const HINT_KEY = "mobile.hint.seen";
+      const mobileToast = document.getElementById("mobile-toast");
+      function maybeShowMobileHint() {
+        if (window.innerWidth > MOBILE_MAX_PX) return;
+        if (sessionStorage.getItem(HINT_KEY)) return;
+        mobileToast.textContent = "📅 모바일에서는 목록 뷰가 기본입니다 (월 ↻ 가능)";
+        mobileToast.hidden = false;
+        requestAnimationFrame(() => { mobileToast.dataset.visible = "true"; });
+        setTimeout(() => {
+          mobileToast.dataset.visible = "false";
+          setTimeout(() => { mobileToast.hidden = true; }, 250);
+        }, 2500);
+        try { sessionStorage.setItem(HINT_KEY, "1"); } catch (e) {}
+      }
+
+      // ─── Info popover for shortened subtitle (MOB-9) ────────────
+      document.addEventListener("click", (e) => {
+        if (e.target.matches("[data-info-toggle]")) {
+          e.stopPropagation();
+          mobileToast.textContent = "각 일정은 해당 날짜에 마감되는 공지입니다 (공지 게시일 아님)";
+          mobileToast.hidden = false;
+          requestAnimationFrame(() => { mobileToast.dataset.visible = "true"; });
+          setTimeout(() => {
+            mobileToast.dataset.visible = "false";
+            setTimeout(() => { mobileToast.hidden = true; }, 250);
+          }, 3500);
+        }
+      });
+
+      function renderDayDots() {
+        const cells = document.querySelectorAll(".fc-daygrid-day");
+        const events = calendar.getEvents();
+        cells.forEach((cell) => {
+          const dateStr = cell.getAttribute("data-date");
+          if (!dateStr) return;
+          // 기존 dots 제거
+          const existing = cell.querySelector(".day-dots");
+          if (existing) existing.remove();
+          const dayEvents = events.filter((ev) => ev.startStr === dateStr);
+          if (dayEvents.length === 0) return;
+          const dots = document.createElement("div");
+          dots.className = "day-dots";
+          dayEvents.slice(0, 3).forEach((ev) => {
+            const cat = ev.extendedProps.category || "일반공지";
+            const meta = metaFor(cat);
+            const dot = document.createElement("span");
+            dot.className = "day-dot";
+            dot.setAttribute("data-category", meta.key);
+            dots.appendChild(dot);
+          });
+          if (dayEvents.length > 3) {
+            const more = document.createElement("span");
+            more.className = "day-dots__more";
+            more.textContent = `+${dayEvents.length - 3}`;
+            dots.appendChild(more);
+          }
+          const target = cell.querySelector(".fc-daygrid-day-events") || cell.querySelector(".fc-daygrid-day-frame");
+          if (target) target.appendChild(dots);
+        });
+      }
+
       const calendarEl = document.getElementById("calendar");
       const calendar = new FullCalendar.Calendar(calendarEl, {
         locale: "ko",
@@ -308,22 +473,44 @@
           info.el.addEventListener("focus", () => showTooltip(info.el, fullText));
           info.el.addEventListener("blur", hideTooltip);
         },
+        dateClick: function (info) {
+          if (window.innerWidth > MOBILE_MAX_PX) return;
+          if (calendar.view.type !== "dayGridMonth") return;
+          const dayEvents = calendar.getEvents().filter((ev) => ev.startStr === info.dateStr);
+          openDaySheet(info.dateStr, dayEvents);
+        },
         eventClick: function (info) {
           info.jsEvent.preventDefault();
           showModal(info.event);
         },
+        dayCellDidMount: function (info) {
+          if (window.innerWidth > MOBILE_MAX_PX) return;
+          if (calendar.view.type !== "dayGridMonth") return;
+          const iso = info.date.toISOString().slice(0, 10);
+          // 첫 paint 시 events가 비어 있을 수 있어 datesSet에서도 재호출
+        },
         datesSet: function (info) {
           rememberView(info.view.type);
+          document.body.dataset.view = info.view.type;
+          // 모바일 + 월뷰일 때 dot 마커 렌더
+          if (window.innerWidth <= MOBILE_MAX_PX && info.view.type === "dayGridMonth") {
+            requestAnimationFrame(renderDayDots);
+          }
         },
         loading: function (isLoading) {
           if (!isLoading) {
             const evs = calendar.getEvents();
             document.getElementById("event-count").textContent =
               `${evs.length}건 마감 예정`;
+            if (window.innerWidth <= MOBILE_MAX_PX && calendar.view.type === "dayGridMonth") {
+              requestAnimationFrame(renderDayDots);
+            }
           }
         },
       });
       calendar.render();
+      document.body.dataset.view = calendar.view.type;
+      maybeShowMobileHint();
     })();
   </script>
 </body>

@@ -728,6 +728,11 @@ main {
 /* ─── Responsive layer (P0-3) ─────────────────────────────────── */
 
 html, body { overflow-x: hidden; }
+html { word-break: keep-all; overflow-wrap: anywhere; }
+body {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
 
 /* md: tablet portrait and small laptops */
 @media (max-width: 768px) {
@@ -744,6 +749,13 @@ html, body { overflow-x: hidden; }
   #calendar { padding: 10px; border-radius: var(--r-md); }
   .hero-word { font-size: 48px; border-bottom-width: 4px; }
   .hero-tag { display: none; }
+}
+
+/* xs: 360px and below */
+@media (max-width: 360px) {
+  .hero-word { font-size: 40px; border-bottom-width: 3px; }
+  .site-head { padding: 12px 14px; }
+  .brand { font-size: 13px; }
 }
 
 /* ─── Header stack (P0-3b) ────────────────────────────────────── */
@@ -818,6 +830,55 @@ html, body { overflow-x: hidden; }
   .fc .fc-toolbar-chunk:first-child .fc-button-group { width: 100%; }
 }
 
+/* ─── Mobile touch targets + dot markers + brand copy (MOB-5b, MOB-2, MOB-9) ── */
+
+@media (max-width: 768px) {
+  /* 터치 타깃 44pt 보정 (MOB-5b) */
+  .fc .fc-daygrid-event { min-height: 44px; padding: 8px 10px; }
+  .fc .fc-daygrid-day-frame { min-height: 64px; }
+  .legend-chip { min-height: 36px; padding: 4px 8px; }
+
+  /* 모바일 월뷰: 이벤트 칩 숨기고 dot 마커만 (MOB-2) */
+  body[data-view="dayGridMonth"] .fc-daygrid-event-harness { display: none; }
+  body[data-view="dayGridMonth"] .fc-daygrid-day-events {
+    padding: 0 6px 4px;
+    min-height: 12px;
+  }
+  .day-dots { display: flex; gap: 3px; padding: 0 6px 6px; flex-wrap: wrap; }
+  .day-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--text-tertiary);
+  }
+  .day-dot[data-category="scholarship"]    { background: #8b5cf6; }
+  .day-dot[data-category="academic"]       { background: #14b8a6; }
+  .day-dot[data-category="career"]         { background: #ec4899; }
+  .day-dot[data-category="extracurricular"] { background: #f59e0b; }
+  .day-dot[data-category="notice"]         { background: #6b7280; }
+  .day-dots__more {
+    font-size: 9px;
+    color: var(--text-tertiary);
+    line-height: 1;
+  }
+
+  /* 모바일 단축 카피 (MOB-9) */
+  .brand-subtitle--full { display: none; }
+  .brand-subtitle--short { display: block; }
+  .info-pop {
+    background: none;
+    border: none;
+    color: var(--accent);
+    cursor: pointer;
+    padding: 2px 4px;
+    font-size: 13px;
+  }
+}
+
+/* 데스크톱: 전체 카피 노출, 짧은 카피 숨김 (MOB-9) */
+@media (min-width: 769px) {
+  .brand-subtitle--full { display: block; }
+  .brand-subtitle--short { display: none; }
+}
+
 /* ─── List view polish (P0-3c) ────────────────────────────────── */
 .fc .fc-list {
   background: var(--bg-card);
@@ -855,3 +916,122 @@ html, body { overflow-x: hidden; }
     display: none;
   }
 }
+
+/* ─── Mobile Bottom Sheet (MOB-2) ─────────────────────────────── */
+
+.day-sheet__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 199;
+  background: rgba(15, 23, 42, 0.32);
+  backdrop-filter: blur(3px);
+  opacity: 0;
+  transition: opacity 0.22s ease-out;
+  pointer-events: none;
+}
+.day-sheet__backdrop[data-open="true"] {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.day-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 200;
+  max-height: 70vh;
+  background: var(--bg-card);
+  border-top: 1px solid var(--border);
+  border-radius: var(--r-lg) var(--r-lg) 0 0;
+  box-shadow: var(--shadow-popover);
+  transform: translateY(100%);
+  transition: transform 0.22s ease-out;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: max(env(safe-area-inset-bottom), 16px);
+}
+.day-sheet[data-open="true"] {
+  transform: translateY(0);
+}
+.day-sheet[hidden] { display: none; }
+
+.day-sheet__handle {
+  width: 36px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin: 8px auto 4px;
+  flex-shrink: 0;
+}
+
+.day-sheet__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 20px 12px;
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--text);
+  border-bottom: 1px solid var(--border-soft);
+  flex-shrink: 0;
+}
+
+.day-sheet__list {
+  padding: 8px 16px 16px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.day-sheet__empty {
+  text-align: center;
+  color: var(--text-tertiary);
+  padding: 32px 16px;
+  font-size: 13px;
+}
+
+.day-sheet__item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 4px;
+  border-bottom: 1px solid var(--border-soft);
+  text-decoration: none;
+  color: var(--text);
+}
+.day-sheet__item:last-child { border-bottom: none; }
+.day-sheet__item-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.day-sheet__item-title {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+  word-break: keep-all;
+}
+
+@media (min-width: 769px) {
+  .day-sheet, .day-sheet__backdrop { display: none !important; }
+}
+
+/* ─── Mobile hint toast (MOB-2 risk mitigation) ───────────────── */
+.mobile-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  z-index: 300;
+  background: rgba(15, 17, 21, 0.92);
+  color: #ffffff;
+  padding: 10px 16px;
+  border-radius: var(--r-md);
+  font-size: 13px;
+  box-shadow: var(--shadow-popover);
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+  max-width: calc(100vw - 32px);
+}
+.mobile-toast[data-visible="true"] { opacity: 1; }

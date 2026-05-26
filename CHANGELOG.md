@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.2.0] — 2026-05-26
+
+### Calendar UI · Mobile usability patch
+- **MOB-2** Mobile month view shows date + dot markers per category (max 3 + `+N`); tap opens a Bottom Sheet listing all events for that day. Cell event chips are hidden via `body[data-view="dayGridMonth"]` selector to avoid cramped layouts on narrow viewports.
+- **MOB-3c** Additional 360px breakpoint shrinks hero word to 40px and tightens header padding for very small phones.
+- **MOB-4** Global `word-break: keep-all` + `overflow-wrap: anywhere` on `<html>` so Korean text breaks on word boundaries rather than per-character; long URLs still wrap.
+- **MOB-5b** Minimum 44px touch targets on day-grid event chips, day cells, and legend chips for ≤768px.
+- **MOB-8** `env(safe-area-inset-*)` padding on `body` and Bottom Sheet so headers/sheets clear iPhone notch and home indicator. Viewport meta updated to `viewport-fit=cover`.
+- **MOB-9** Mobile-shortened brand subtitle ("마감일 기준 캘린더입니다.") with `ⓘ` toggle that surfaces the full copy in a tooltip-style popover. Desktop still shows the full subtitle.
+
+### Tests
+- `tests/test_calendar_web_assets.py` adds static assertions on `docs/calendar/index.html` and `docs/calendar/style.css` to lock in the markup/rule presence of new mobile-only structures.
+
 ## [1.1.0] — 2026-05-26
 
 ### Calendar UI · P0 batch
