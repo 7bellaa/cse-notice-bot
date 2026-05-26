@@ -145,6 +145,20 @@
         return categoryMeta[cat] || defaultCategoryMeta;
       }
 
+      // ─── View preference + auto list-view on mobile (P0-3) ──────
+      const VIEW_PREF_KEY = "view.preference";
+      const MOBILE_MAX_PX = 768;
+
+      function preferredInitialView() {
+        const explicit = sessionStorage.getItem(VIEW_PREF_KEY);
+        if (explicit === "dayGridMonth" || explicit === "listMonth") return explicit;
+        return window.innerWidth <= MOBILE_MAX_PX ? "listMonth" : "dayGridMonth";
+      }
+
+      function rememberView(viewName) {
+        try { sessionStorage.setItem(VIEW_PREF_KEY, viewName); } catch (e) {}
+      }
+
       // 5-category canonical palette — keep in sync with src/cse_bot/category.py
       const palette = {
         "장학/등록": "#8b5cf6",
@@ -264,7 +278,7 @@
       const calendarEl = document.getElementById("calendar");
       const calendar = new FullCalendar.Calendar(calendarEl, {
         locale: "ko",
-        initialView: "dayGridMonth",
+        initialView: preferredInitialView(),
         headerToolbar: {
           left: "prev,next today",
           center: "title",
@@ -327,6 +341,9 @@
         eventClick: function (info) {
           info.jsEvent.preventDefault();
           showModal(info.event);
+        },
+        datesSet: function (info) {
+          rememberView(info.view.type);
         },
         loading: function (isLoading) {
           if (!isLoading) {
