@@ -51,7 +51,7 @@ set -a; source .env; set +a
 
 1. <https://aistudio.google.com/> → "Get API key" → 새 프로젝트 생성
 2. `.env`에 `GEMINI_API_KEY=AIza...` 추가
-3. 무료 티어 (Gemini 2.5 Flash-Lite, ~1,000 요청/일)는 봇 사용량의 100배 이상이라 카드 등록 불필요
+3. 기본 모델은 **Gemini 2.5 Flash** (이미지 OCR 강함, 포스터에 박힌 마감일 정확 추출). 일일 ~5건 호출 기준 paid tier 월 ~$0.30. 무료 티어 RPD 한도가 빠듯하면 `[gemini].model = "gemini-2.5-flash-lite"`로 내려서 일일 1,000건까지 가능 (텍스트 마감 추출은 거의 동일, OCR만 약함)
 
 ### launchd 등록
 
@@ -120,7 +120,7 @@ diff <(jq -S . /tmp/events-pre-v2.json) \
 |---|---|---|
 | `[general].max_pages` | 매 cycle list fetch 페이지 수 | `3` |
 | `[notification].format` | 텍스트 알림 포맷 (`minimal`/`medium`/`detailed`) — legacy 모드에서만 사용 | `medium` |
-| `[gemini].model` | Gemini 모델 | `gemini-2.5-flash-lite` |
+| `[gemini].model` | Gemini 모델 (`gemini-2.5-flash` 또는 `gemini-2.5-flash-lite`) | `gemini-2.5-flash` |
 | `[calendar].enabled` | 캘린더+digest 모드 켜기 | `true` |
 | `[calendar].cache_ttl_days` | list에서 사라진 글의 cache 보존 기간 | `30` |
 | `[calendar].months_in_png` | PNG에 그릴 월 수 | `2` |
