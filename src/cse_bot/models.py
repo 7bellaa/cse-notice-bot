@@ -42,3 +42,31 @@ class BoardState:
     last_checked: str
     empty_streak: int = 0
     deadlines: list[TrackedDeadline] = field(default_factory=list)
+
+
+@dataclass
+class PostCacheEntry:
+    """One post's cached snapshot — last seen body hash + extracted fields."""
+    title: str
+    url: str
+    content_hash: str
+    summarized_at: str
+    deadline: str | None
+    category: str
+    summary: str
+    important: bool
+    last_seen: str
+
+
+@dataclass(frozen=True)
+class ManualOverride:
+    """Operator-supplied deadline entry. Wins over cache on URL collision."""
+    id: str
+    title: str
+    url: str
+    date: str
+    category: str = ""
+    important: bool = False
+    added_at: str = ""
+    added_by: str = ""
+    expires_at: str | None = None
