@@ -216,7 +216,14 @@ def test_update_cache_fetch_failure_bumps_last_seen_but_keeps_entry() -> None:
     assert entry.last_seen == "2026-05-26T23:00:00+09:00"  # bumped
 
 
-def test_update_cache_summarize_failure_creates_stub_when_no_prior_entry() -> None:
+def test_update_cache_summarize_failure_skips_when_no_prior_entry() -> None:
+    """Transient summarize failure must NOT create a stub.
+
+    A stub with the new body's hash would match next cycle and skip
+    Gemini permanently — turning a 503 into a frozen `deadline=None`.
+    Skipping the write keeps the post out of cache so next cycle treats
+    it as a cache miss and retries.
+    """
     cache = PostCache()
 
     def fake_fetch(url: str) -> ArticleContent | None:
@@ -231,10 +238,45 @@ def test_update_cache_summarize_failure_creates_stub_when_no_prior_entry() -> No
         fetch_body=fake_fetch,
         summarize_fn=fake_summarize,
     )
-    # Stub entry exists with deadline=None so we don't keep summarising it
-    entry = cache.boards["14221"]["999"]
-    assert entry.deadline is None
-    assert entry.title == "[장학] t"
+    assert "999" not in cache.boards.get("14221", {})
+
+
+def test_update_cache_summarize_failure_preserves_prior_entry_for_retry() -> None:
+    """When body changed but summarize fails, keep prior cache *and*
+    leave content_hash untouched so next cycle's mismatch triggers retry.
+    """
+    from cse_bot.post_cache import content_hash as _hash
+    cache = PostCache()
+    old_hash = _hash("OLD body")
+    cache.boards["14221"] = {
+        "100": PostCacheEntry(
+            title="cached", url="https://x/100",
+            content_hash=old_hash,
+            summarized_at="2026-05-01T00:00:00+09:00",
+            deadline="2026-06-22", category="장학/등록",
+            summary="cached", important=False,
+            last_seen="2026-05-01T00:00:00+09:00",
+        )
+    }
+
+    def fake_fetch(url: str) -> ArticleContent | None:
+        return ArticleContent(body="NEW body", image_urls=[])
+
+    def fake_summarize(body: str, image_urls: list[str]) -> SummaryResult | None:
+        return None
+
+    update_cache_from_snapshot(
+        cache, "14221",
+        [Post(id=100, title="t", author="", date="", url="https://x/100",
+              category="", has_attachment=False)],
+        now_iso="2026-05-26T23:00:00+09:00",
+        fetch_body=fake_fetch,
+        summarize_fn=fake_summarize,
+    )
+    entry = cache.boards["14221"]["100"]
+    assert entry.deadline == "2026-06-22"             # preserved
+    assert entry.content_hash == old_hash             # NOT refreshed — retries next cycle
+    assert entry.last_seen == "2026-05-26T23:00:00+09:00"  # bumped (TTL safe)
 
 
 # ─── run_calendar_publish tests ───────────────────────────────────────────────
