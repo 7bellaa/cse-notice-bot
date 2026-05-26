@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from datetime import date, timedelta
 
-from cse_bot.models import BoardState, TrackedDeadline
+from cse_bot.models import BoardState, TrackedDeadline, safe_iso_date
 
 
 def collect_due_reminders(
@@ -20,9 +20,8 @@ def collect_due_reminders(
         for d in board_state.deadlines:
             if d.reminded:
                 continue
-            try:
-                d_date = date.fromisoformat(d.date)
-            except ValueError:
+            d_date = safe_iso_date(d.date)
+            if d_date is None:
                 continue
             if d_date == target:
                 out.append((board_id, d))
@@ -35,12 +34,8 @@ def prune_expired(state_map: dict[str, BoardState], *, today: date) -> int:
     for board_state in state_map.values():
         kept: list[TrackedDeadline] = []
         for d in board_state.deadlines:
-            try:
-                d_date = date.fromisoformat(d.date)
-            except ValueError:
-                removed += 1
-                continue
-            if d_date < today:
+            d_date = safe_iso_date(d.date)
+            if d_date is None or d_date < today:
                 removed += 1
                 continue
             kept.append(d)

@@ -304,7 +304,6 @@ timeout_seconds = 10
 enabled = true
 output_dir = "docs/calendar"
 site_url = "https://example.com"
-months_in_png = 2
 cache_path = "data/post_cache.json"
 manual_overrides_path = "data/manual_deadlines.json"
 cache_ttl_days = 30
@@ -353,7 +352,6 @@ timeout_seconds = 10
 enabled = true
 output_dir = "docs/calendar"
 site_url = "https://example.com"
-months_in_png = 2
 
 [[boards]]
 id = "14221"

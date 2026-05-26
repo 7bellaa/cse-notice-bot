@@ -43,8 +43,6 @@ class CalendarConfig:
     enabled: bool
     output_dir: str
     site_url: str
-    months_in_png: int
-    font_path: str | None
     cache_path: str
     manual_overrides_path: str
     cache_ttl_days: int
@@ -182,8 +180,6 @@ def _load_calendar(raw: dict[str, Any]) -> CalendarConfig:
             enabled=False,
             output_dir="docs/calendar",
             site_url="",
-            months_in_png=2,
-            font_path=None,
             cache_path="data/post_cache.json",
             manual_overrides_path="data/manual_deadlines.json",
             cache_ttl_days=30,
@@ -194,11 +190,6 @@ def _load_calendar(raw: dict[str, Any]) -> CalendarConfig:
     site_url = str(c.get("site_url", "")).rstrip("/")
     if enabled and not site_url:
         raise ConfigError("[calendar].site_url is required when calendar.enabled = true")
-    months_in_png = int(c.get("months_in_png", 2))
-    if months_in_png < 1 or months_in_png > 6:
-        raise ConfigError("[calendar].months_in_png must be between 1 and 6")
-    font_path_raw = c.get("font_path")
-    font_path = str(font_path_raw) if font_path_raw else None
     cache_path = str(c.get("cache_path", "data/post_cache.json"))
     manual_overrides_path = str(
         c.get("manual_overrides_path", "data/manual_deadlines.json")
@@ -210,8 +201,6 @@ def _load_calendar(raw: dict[str, Any]) -> CalendarConfig:
         enabled=enabled,
         output_dir=output_dir,
         site_url=site_url,
-        months_in_png=months_in_png,
-        font_path=font_path,
         cache_path=cache_path,
         manual_overrides_path=manual_overrides_path,
         cache_ttl_days=cache_ttl_days,

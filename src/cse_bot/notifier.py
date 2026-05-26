@@ -15,8 +15,14 @@ from tenacity import (
     wait_exponential,
 )
 
+from cse_bot.calendar_renderer import (
+    CHIP_TAG_PALETTE,
+    NEAR_AMBER,
+    SOFT_BLUE,
+    URGENT_RED,
+)
 from cse_bot.category import extract_category, is_important
-from cse_bot.models import Post, TrackedDeadline
+from cse_bot.models import Post, TrackedDeadline, safe_iso_date, strip_category_prefix
 
 log = logging.getLogger(__name__)
 
@@ -40,17 +46,20 @@ class _RetryableNotifyError(Exception):
 
 DISCORD_MAX = 2000
 
-# Discord embed accent colors keyed to deadline urgency.
-URGENT_RED_HEX = 0xDC2626   # D-≤3
-NEAR_AMBER_HEX = 0xF59E0B   # D-≤7
-DEFAULT_EMBED_HEX = 0x5865F2  # blurple — no upcoming or far-out
+
+def _rgb_to_int(rgb: tuple[int, int, int]) -> int:
+    r, g, b = rgb
+    return (r << 16) | (g << 8) | b
+
+
+# Discord embed accent colors derived from the canonical RGB palette in
+# calendar_renderer so the embed sidebar matches the strip PNG and chip tags.
+URGENT_RED_HEX = _rgb_to_int(URGENT_RED)
+NEAR_AMBER_HEX = _rgb_to_int(NEAR_AMBER)
+DEFAULT_EMBED_HEX = _rgb_to_int(SOFT_BLUE)  # Discord blurple
 
 CATEGORY_COLOR_HEX: dict[str, int] = {
-    "장학/등록":  0x6D3FCF,
-    "학업/수강":  0x0D8A7E,
-    "졸업/진로":  0xC93A7F,
-    "비교과/활동": 0xC97D05,
-    "일반공지":   0x4B5563,
+    category: _rgb_to_int(rgb) for category, rgb in CHIP_TAG_PALETTE.items()
 }
 
 # Max upcoming deadlines surfaced as embed fields. Discord allows 25 max;
@@ -226,26 +235,12 @@ def send_alert(message: str, *, webhook_url: str, timeout: float = 5.0) -> None:
 # ─── Daily digest (calendar + 1-line new posts) ──────────────────────────
 
 
-def _safe_iso_date(s: str) -> date | None:
-    try:
-        return date.fromisoformat(s)
-    except ValueError:
-        return None
-
-
-def _strip_category_prefix(title: str) -> str:
-    """Drop a leading ``[카테고리]`` tag so it doesn't double up with the chip."""
-    if title.startswith("[") and "]" in title:
-        return title[title.index("]") + 1:].strip()
-    return title
-
-
 def _pick_accent_color(upcoming: list[TrackedDeadline], today: date) -> int:
     """Pick an embed color signaling urgency at-a-glance in the channel list."""
     if not upcoming:
         return DEFAULT_EMBED_HEX
     first = upcoming[0]
-    d_date = _safe_iso_date(first.date)
+    d_date = safe_iso_date(first.date)
     if d_date is None:
         return DEFAULT_EMBED_HEX
     delta = (d_date - today).days
@@ -267,7 +262,7 @@ def _build_deadline_fields(
     """
     fields: list[dict[str, object]] = []
     for d in upcoming[:MAX_DEADLINE_FIELDS]:
-        d_date = _safe_iso_date(d.date)
+        d_date = safe_iso_date(d.date)
         if d_date is None:
             continue
         delta = (d_date - today).days
@@ -280,7 +275,7 @@ def _build_deadline_fields(
             d_tag = "D-1"
         else:
             d_tag = f"D-{delta}"
-        title = _strip_category_prefix(d.title)
+        title = strip_category_prefix(d.title)
         if d.important:
             title = f"★ {title}"
         category_label = d.category or "일반공지"
@@ -311,7 +306,7 @@ def _format_upcoming_description(
     d_minus_1_count = sum(1 for d in upcoming if d.date == tomorrow.isoformat())
     week_count = 0
     for d in upcoming:
-        d_date = _safe_iso_date(d.date)
+        d_date = safe_iso_date(d.date)
         if d_date is None:
             continue
         delta = (d_date - today).days
@@ -345,10 +340,7 @@ def _format_new_posts_content(
 
     for i, post in enumerate(new_posts):
         category = extract_category(post.title) or "공지"
-        clean_title = post.title
-        # Strip the [category] prefix from the displayed title to reduce noise
-        if clean_title.startswith("[") and "]" in clean_title:
-            clean_title = clean_title[clean_title.index("]") + 1:].strip()
+        clean_title = strip_category_prefix(post.title)
         marker = "★ " if is_important(post.title) else ""
         line = f"· {marker}[{category}] {clean_title} — {post.url}"
 

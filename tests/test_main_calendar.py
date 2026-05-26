@@ -62,7 +62,6 @@ timeout_seconds = 10
 enabled = true
 output_dir = "{tmp_path / 'docs/calendar'}"
 site_url = "https://example.com/calendar"
-months_in_png = 2
 cache_path = "{tmp_path / 'post_cache.json'}"
 manual_overrides_path = "{tmp_path / 'manual_deadlines.json'}"
 cache_ttl_days = 30

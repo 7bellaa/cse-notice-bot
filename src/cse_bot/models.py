@@ -1,7 +1,23 @@
-"""Data classes used across the bot."""
+"""Data classes used across the bot, plus tiny string helpers for their fields."""
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from datetime import date
+
+
+def safe_iso_date(s: str) -> date | None:
+    """Parse an ISO ``YYYY-MM-DD`` string, returning ``None`` on failure."""
+    try:
+        return date.fromisoformat(s)
+    except ValueError:
+        return None
+
+
+def strip_category_prefix(title: str) -> str:
+    """Drop a leading ``[카테고리]`` tag so the display chip doesn't double up."""
+    if title.startswith("[") and "]" in title:
+        return title[title.index("]") + 1:].strip()
+    return title
 
 
 @dataclass(frozen=True)
