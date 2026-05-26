@@ -700,17 +700,15 @@ main {
 .fc-daygrid-event[data-category="extracurricular"] .chip-tag { background: #c97d05; }
 .fc-daygrid-event[data-category="notice"]         .chip-tag { background: #4b5563; }
 
-/* Title: -webkit-box line-clamp at 2 lines. The chip-tag is an
-   inline-block CHILD of this box, so line 2 wraps naturally to the
-   left edge, filling the empty space below the tag. */
+/* Title: natural multi-line wrap. The chip-tag is an inline-block
+   prefix, so the title text flows after it on line 1 and wraps to the
+   left edge on subsequent lines, filling the space below the tag. No
+   clamp — busy weeks just grow taller; users see every full title. */
 .fc-daygrid-event .fc-event-title.event-chip__title,
 .fc-daygrid-event .event-chip__title {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  display: block;
+  overflow: visible;
   white-space: normal;
-  text-overflow: clip;
   word-break: keep-all;
   line-height: 1.4;
   font-size: 12px;
@@ -719,6 +717,12 @@ main {
   margin: 0;
   padding: 0;
 }
+
+/* Variable-height rows: empty weeks shrink. FullCalendar's default
+   .fc-daygrid-day-frame has no min-height; the row's height is the
+   max content height across its 7 day cells. We add a small floor so
+   empty rows aren't squashed to just the day-number. */
+.fc .fc-daygrid-day-frame { min-height: 56px; }
 
 .fc-list-event .chip-tag {
   margin-right: 8px;

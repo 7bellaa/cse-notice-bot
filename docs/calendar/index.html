@@ -289,9 +289,11 @@
           month: "월",
           list: "목록",
         },
-        dayMaxEvents: 3,
-        moreLinkClick: "popover",
-        moreLinkText: (n) => `+ ${n}건 더보기`,
+        // Variable-height rows: empty weeks collapse, busy weeks grow
+        // tall enough to show every event with its full title.
+        height: "auto",
+        expandRows: false,
+        dayMaxEvents: false,
         displayEventTime: false,
         events: "./events.json",
         eventDidMount: function (info) {
