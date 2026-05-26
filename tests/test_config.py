@@ -277,3 +277,93 @@ def test_load_config_rejects_empty_webhook_envs(tmp_path, monkeypatch):
     from cse_bot.config import ConfigError, load_config
     with pytest.raises(ConfigError):
         load_config(cfg_path)
+
+
+def test_calendar_config_has_v2_cache_paths(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    cfg_path = tmp_path / "config.toml"
+    cfg_path.write_text("""
+[general]
+log_dir = "logs"
+state_file = "data/state.json"
+max_pages = 1
+http_timeout_seconds = 5
+http_retries = 1
+
+[notification]
+format = "medium"
+self_alert_webhook_env = "WH_ALERT"
+
+[gemini]
+api_key_env = "GEMINI_API_KEY"
+model = "m"
+timeout_seconds = 10
+
+[calendar]
+enabled = true
+output_dir = "docs/calendar"
+site_url = "https://example.com"
+months_in_png = 2
+cache_path = "data/post_cache.json"
+manual_overrides_path = "data/manual_deadlines.json"
+cache_ttl_days = 30
+
+[[boards]]
+id = "14221"
+name = "x"
+url = "https://x"
+webhook_envs = ["WH_GEN"]
+enabled = true
+""", encoding="utf-8")
+    monkeypatch.setenv("WH_GEN", "https://discord/x")
+    monkeypatch.setenv("WH_ALERT", "https://discord/a")
+    monkeypatch.setenv("GEMINI_API_KEY", "k")
+
+    from cse_bot.config import load_config
+    cfg = load_config(cfg_path)
+    assert cfg.calendar.cache_path == "data/post_cache.json"
+    assert cfg.calendar.manual_overrides_path == "data/manual_deadlines.json"
+    assert cfg.calendar.cache_ttl_days == 30
+
+
+def test_calendar_config_defaults_when_v2_keys_missing(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Old configs without v2 keys still load (with sensible defaults)."""
+    cfg_path = tmp_path / "config.toml"
+    cfg_path.write_text("""
+[general]
+log_dir = "logs"
+state_file = "data/state.json"
+max_pages = 1
+http_timeout_seconds = 5
+http_retries = 1
+
+[notification]
+format = "medium"
+self_alert_webhook_env = "WH_ALERT"
+
+[gemini]
+api_key_env = "GEMINI_API_KEY"
+model = "m"
+timeout_seconds = 10
+
+[calendar]
+enabled = true
+output_dir = "docs/calendar"
+site_url = "https://example.com"
+months_in_png = 2
+
+[[boards]]
+id = "14221"
+name = "x"
+url = "https://x"
+webhook_envs = ["WH_GEN"]
+enabled = true
+""", encoding="utf-8")
+    monkeypatch.setenv("WH_GEN", "https://discord/x")
+    monkeypatch.setenv("WH_ALERT", "https://discord/a")
+    monkeypatch.setenv("GEMINI_API_KEY", "k")
+
+    from cse_bot.config import load_config
+    cfg = load_config(cfg_path)
+    assert cfg.calendar.cache_path == "data/post_cache.json"
+    assert cfg.calendar.manual_overrides_path == "data/manual_deadlines.json"
+    assert cfg.calendar.cache_ttl_days == 30
