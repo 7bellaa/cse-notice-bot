@@ -119,11 +119,14 @@ def update_cache_from_snapshot(
        returns ``None``, keep the previous cache entry (or write a stub
        so we don't re-summarise an unsummarisable post each cycle).
     """
-    posts = cache.boards.setdefault(board_id, {})
+    board_posts = cache.boards.setdefault(board_id, {})
 
     for post in posts_in_list:
         key = str(post.id)
-        cached = posts.get(key)
+        cached = board_posts.get(key)
+        # Bump last_seen BEFORE fetch — a transient fetch failure must not
+        # leave the entry on a slide toward TTL eviction. The post is still
+        # observed on the list page regardless of whether fetch succeeds.
         if cached is not None:
             cached.last_seen = now_iso
 
@@ -140,7 +143,7 @@ def update_cache_from_snapshot(
         if result is None:
             if cached is None:
                 # Stub so we don't try to summarise this post every cycle.
-                posts[key] = PostCacheEntry(
+                board_posts[key] = PostCacheEntry(
                     title=post.title,
                     url=post.url,
                     content_hash=new_hash,
@@ -156,7 +159,7 @@ def update_cache_from_snapshot(
                 cached.content_hash = new_hash
             continue
 
-        posts[key] = PostCacheEntry(
+        board_posts[key] = PostCacheEntry(
             title=post.title,
             url=post.url,
             content_hash=new_hash,
