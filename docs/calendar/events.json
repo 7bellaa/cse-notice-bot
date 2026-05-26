@@ -1,146 +1,50 @@
 [
   {
-    "id": "1441380",
-    "title": "[장학] 2026.2학기 주거안정장학금 신청 안내",
-    "start": "2026-06-22",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1441380/artclView.do",
-    "color": "#8b5cf6",
-    "extendedProps": {
-      "category": "장학/등록",
-      "summary": "학과 거주 학생 대상 주거안정장학금 신청.",
-      "important": true
-    }
-  },
-  {
-    "id": "1441379",
-    "title": "[장학] 2026.1학기 국가근로장학금 하계방학 집중근로(교외)",
-    "start": "2026-05-29",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1441379/artclView.do",
-    "color": "#8b5cf6",
-    "extendedProps": {
-      "category": "장학/등록",
-      "summary": "하계방학 교외 집중근로 신청.",
-      "important": false
-    }
-  },
-  {
-    "id": "1441378",
-    "title": "[장학] 2026-2학기 국가장학금 1차 신청 안내",
-    "start": "2026-06-22",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1441378/artclView.do",
-    "color": "#8b5cf6",
-    "extendedProps": {
-      "category": "장학/등록",
-      "summary": "국가장학금 1차 신청.",
-      "important": true
-    }
-  },
-  {
-    "id": "1441377",
-    "title": "[수업] 여름 계절수업 폐강 통보 및 수강정정",
-    "start": "2026-05-30",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1441377/artclView.do",
-    "color": "#14b8a6",
-    "extendedProps": {
-      "category": "학업/수강",
-      "summary": "폐강강좌 1차 통보 + 수강정정.",
-      "important": true
-    }
-  },
-  {
-    "id": "1441350",
-    "title": "[취업전략과] 2026 GLOBAL TALENT FAIR 채용박람회",
-    "start": "2026-06-10",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1441350/artclView.do",
-    "color": "#ec4899",
-    "extendedProps": {
-      "category": "졸업/진로",
-      "summary": "글로벌 기업 채용박람회 신청.",
-      "important": true
-    }
-  },
-  {
-    "id": "1441440",
-    "title": "[AI융합교육원] 2026 PNU AI Booster 2기 모집",
-    "start": "2026-05-27",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1441440/artclView.do",
-    "color": "#f59e0b",
-    "extendedProps": {
-      "category": "비교과/활동",
-      "summary": "AI 부트캠프 참가자 모집.",
-      "important": true
-    }
-  },
-  {
-    "id": "1441120",
-    "title": "[모집] 현장실습학기제 참여학생 모집",
-    "start": "2026-06-15",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1441120/artclView.do",
-    "color": "#f59e0b",
-    "extendedProps": {
-      "category": "비교과/활동",
-      "summary": "여름 현장실습학기제 모집.",
-      "important": false
-    }
-  },
-  {
-    "id": "1441090",
-    "title": "[AI융합교육원] 해양AI 콘텐츠 경진대회",
-    "start": "2026-06-05",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1441090/artclView.do",
-    "color": "#f59e0b",
-    "extendedProps": {
-      "category": "비교과/활동",
-      "summary": "부산대 대표 선발.",
-      "important": true
-    }
-  },
-  {
-    "id": "1441060",
-    "title": "[AI융합교육원] 여름계절학기 AI 부트캠프",
-    "start": "2026-06-12",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1441060/artclView.do",
-    "color": "#f59e0b",
-    "extendedProps": {
-      "category": "비교과/활동",
-      "summary": "AI 부트캠프 모집.",
-      "important": true
-    }
-  },
-  {
-    "id": "1388562",
-    "title": "[졸업] 2026년 8월 졸업예정자 졸업요건 서류 제출",
-    "start": "2026-07-10",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1388562/artclView.do",
-    "color": "#ec4899",
-    "extendedProps": {
-      "category": "졸업/진로",
-      "summary": "8월 졸업예정자 서류 제출.",
-      "important": true
-    }
-  },
-  {
-    "id": "1441381",
-    "title": "IT관 학부생 공간 이용 안내",
-    "start": "2026-06-08",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1441381/artclView.do",
+    "id": "1439318",
+    "title": "[국립대학육성사업] 2026 제4기 Arise PNU 글로벌 사회공헌단 신청 안내(~5/2 새글",
+    "start": "2026-05-26",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1439318/artclView.do",
     "color": "#6b7280",
     "extendedProps": {
-      "category": "일반공지",
-      "summary": "IT관 학부생 자율 공간 이용 안내.",
+      "category": "",
+      "summary": "",
       "important": false
     }
   },
   {
-    "id": "1441020",
-    "title": "TOPCIT 2026 정기 평가 응시 신청",
-    "start": "2026-06-30",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1441020/artclView.do",
-    "color": "#ec4899",
+    "id": "1440792",
+    "title": "[국제협력실] 2026 하계 APRU Certificate In Global Climate 새글",
+    "start": "2026-05-26",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1440792/artclView.do",
+    "color": "#6b7280",
     "extendedProps": {
-      "category": "졸업/진로",
-      "summary": "TOPCIT 정기 평가 응시 신청.",
-      "important": true
+      "category": "",
+      "summary": "",
+      "important": false
+    }
+  },
+  {
+    "id": "1440877",
+    "title": "2026학년도 제2학기 재입학 시행계획 알림 새글",
+    "start": "2026-05-26",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1440877/artclView.do",
+    "color": "#6b7280",
+    "extendedProps": {
+      "category": "",
+      "summary": "",
+      "important": false
+    }
+  },
+  {
+    "id": "1439312",
+    "title": "[언어교육원] 2026 CLS 한국어교육 프로그램 룸메이트 선발 안내(~5/27) 새글",
+    "start": "2026-05-27",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1439312/artclView.do",
+    "color": "#6b7280",
+    "extendedProps": {
+      "category": "",
+      "summary": "",
+      "important": false
     }
   }
 ]
