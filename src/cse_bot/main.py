@@ -255,10 +255,9 @@ def _emit_daily_digest(
     cache_path = project_root / cfg.calendar.cache_path
     manual_path = project_root / cfg.calendar.manual_overrides_path
 
+    # per_board_full only contains enabled boards (filtered in run_cycle).
     all_events: list[TrackedDeadline] = []
     for board, posts, _new_posts, _summaries in per_board_full:
-        if not board.enabled:
-            continue
         events = calendar_publisher.run_calendar_publish(
             board_id=board.id,
             posts_in_list=posts,
@@ -294,6 +293,7 @@ def _emit_daily_digest(
         if published:
             log.info("calendar.git_published path=%s", out_dir)
     except RuntimeError as e:
+        # Don't abort the digest just because git push failed — log + alert.
         log.warning("calendar.git_publish_failed err=%s", e)
         _safe_alert(cfg, f"calendar git_publish failed: {e}")
 
