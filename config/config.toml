@@ -17,7 +17,7 @@ timeout_seconds = 10
 [calendar]
 enabled = true
 output_dir = "docs/calendar"
-site_url = "https://7bellaa.github.io/cseDiscordBot/calendar"
+site_url = "https://7bellaa.github.io/cse-notice-bot/calendar"
 months_in_png = 2
 font_path = "assets/fonts/Pretendard-Medium.ttf"
 
