@@ -235,3 +235,136 @@ def test_update_cache_summarize_failure_creates_stub_when_no_prior_entry() -> No
     entry = cache.boards["14221"]["999"]
     assert entry.deadline is None
     assert entry.title == "[장학] t"
+
+
+# ─── run_calendar_publish tests ───────────────────────────────────────────────
+
+
+def test_run_calendar_publish_creates_cache_and_returns_events(tmp_path, monkeypatch) -> None:
+    """End-to-end-ish: feed a list, get events back, find cache on disk."""
+    from cse_bot.calendar_publisher import run_calendar_publish
+
+    # Stub article + summarizer so we don't hit the network.
+    def fake_fetch(url, *, timeout, retries):
+        return ArticleContent(body=f"body for {url}", image_urls=[])
+
+    def fake_summarize(body, *, image_urls, api_key, model, timeout):
+        return SummaryResult(summary="long", deadline="2026-06-22", short_summary="short")
+
+    monkeypatch.setattr(
+        "cse_bot.calendar_publisher.article.fetch_article_content", fake_fetch,
+    )
+    monkeypatch.setattr(
+        "cse_bot.calendar_publisher.summarizer.summarize", fake_summarize,
+    )
+
+    cache_path = tmp_path / "post_cache.json"
+    manual_path = tmp_path / "manual.json"
+
+    events = run_calendar_publish(
+        board_id="14221",
+        posts_in_list=[_post(1441380, title="[장학] t1"), _post(1441381, title="[장학] t2")],
+        today=date(2026, 5, 26),
+        now_iso="2026-05-26T23:00:00+09:00",
+        cache_path=cache_path,
+        manual_path=manual_path,
+        ttl_days=30,
+        gemini_api_key="k",
+        gemini_model="m",
+        gemini_timeout=10,
+        http_timeout=5,
+        http_retries=2,
+    )
+
+    assert {e.post_id for e in events} == {1441380, 1441381}
+    assert cache_path.exists()
+
+
+def test_run_calendar_publish_warm_cache_does_not_call_gemini(tmp_path, monkeypatch) -> None:
+    """Second invocation with same body must not call summarize."""
+    from cse_bot.calendar_publisher import run_calendar_publish
+    from cse_bot.post_cache import content_hash, save_post_cache
+
+    cache_path = tmp_path / "post_cache.json"
+    manual_path = tmp_path / "manual.json"
+
+    body = "stable body"
+    cache = PostCache()
+    cache.boards["14221"] = {
+        "100": PostCacheEntry(
+            title="t", url="https://x/100",
+            content_hash=content_hash(body),
+            summarized_at="2026-05-01T00:00:00+09:00",
+            deadline="2026-06-22", category="장학/등록",
+            summary="s", important=False,
+            last_seen="2026-05-01T00:00:00+09:00",
+        )
+    }
+    save_post_cache(cache_path, cache)
+
+    def fake_fetch(url, *, timeout, retries):
+        return ArticleContent(body=body, image_urls=[])
+
+    def fake_summarize(body, *, image_urls, api_key, model, timeout):
+        raise AssertionError("warm cache should skip summarise")
+
+    monkeypatch.setattr(
+        "cse_bot.calendar_publisher.article.fetch_article_content", fake_fetch,
+    )
+    monkeypatch.setattr(
+        "cse_bot.calendar_publisher.summarizer.summarize", fake_summarize,
+    )
+
+    events = run_calendar_publish(
+        board_id="14221",
+        posts_in_list=[Post(id=100, title="t", author="", date="", url="https://x/100",
+                            category="", has_attachment=False)],
+        today=date(2026, 5, 26),
+        now_iso="2026-05-26T23:00:00+09:00",
+        cache_path=cache_path,
+        manual_path=manual_path,
+        ttl_days=30,
+        gemini_api_key="k", gemini_model="m", gemini_timeout=10,
+        http_timeout=5, http_retries=2,
+    )
+    assert len(events) == 1
+    assert events[0].date == "2026-06-22"
+
+
+def test_run_calendar_publish_prunes_stale_entries(tmp_path, monkeypatch) -> None:
+    """Entries with last_seen older than ttl_days are evicted."""
+    from cse_bot.calendar_publisher import run_calendar_publish
+    from cse_bot.post_cache import load_post_cache, save_post_cache
+
+    cache_path = tmp_path / "post_cache.json"
+    manual_path = tmp_path / "manual.json"
+
+    cache = PostCache()
+    cache.boards["14221"] = {
+        "old": PostCacheEntry(
+            title="old", url="https://x/old", content_hash="",
+            summarized_at="", deadline="2026-12-31", category="",
+            summary="", important=False,
+            last_seen="2026-04-01T00:00:00+09:00",  # 55 days old
+        )
+    }
+    save_post_cache(cache_path, cache)
+
+    monkeypatch.setattr(
+        "cse_bot.calendar_publisher.article.fetch_article_content",
+        lambda url, *, timeout, retries: None,
+    )
+
+    run_calendar_publish(
+        board_id="14221",
+        posts_in_list=[],  # "old" no longer on list page
+        today=date(2026, 5, 26),
+        now_iso="2026-05-26T00:00:00+09:00",
+        cache_path=cache_path,
+        manual_path=manual_path,
+        ttl_days=30,
+        gemini_api_key="k", gemini_model="m", gemini_timeout=10,
+        http_timeout=5, http_retries=2,
+    )
+    loaded = load_post_cache(cache_path)
+    assert "old" not in loaded.boards.get("14221", {})

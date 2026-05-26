@@ -10,11 +10,14 @@ from __future__ import annotations
 import logging
 from collections.abc import Callable
 from datetime import date
+from pathlib import Path
 
+from cse_bot import article, summarizer
 from cse_bot.article import ArticleContent
 from cse_bot.category import classify, is_important
+from cse_bot.manual_overrides import load_manual_overrides
 from cse_bot.models import ManualOverride, Post, PostCacheEntry, TrackedDeadline
-from cse_bot.post_cache import PostCache, content_hash
+from cse_bot.post_cache import PostCache, content_hash, load_post_cache, prune_stale, save_post_cache
 from cse_bot.summarizer import SummaryResult
 
 log = logging.getLogger(__name__)
@@ -162,3 +165,58 @@ def update_cache_from_snapshot(
             "calendar.cache_update board=%s post_id=%d deadline=%s",
             board_id, post.id, result.deadline or "none",
         )
+
+
+def run_calendar_publish(
+    *,
+    board_id: str,
+    posts_in_list: list[Post],
+    today: date,
+    now_iso: str,
+    cache_path: Path,
+    manual_path: Path,
+    ttl_days: int,
+    gemini_api_key: str,
+    gemini_model: str,
+    gemini_timeout: float,
+    http_timeout: float,
+    http_retries: int,
+) -> list[TrackedDeadline]:
+    """Refresh the snapshot cache for *board_id* and return active events.
+
+    Keyword-only API so the orchestrator (``main._emit_daily_digest``)
+    passes config explicitly instead of importing :mod:`Config` here,
+    keeping this module independent of the wider TOML schema.
+    """
+    cache = load_post_cache(cache_path)
+
+    def _fetch_body(url: str):
+        return article.fetch_article_content(
+            url, timeout=http_timeout, retries=http_retries,
+        )
+
+    def _summarize(body: str, image_urls: list[str]):
+        return summarizer.summarize(
+            body,
+            image_urls=image_urls,
+            api_key=gemini_api_key,
+            model=gemini_model,
+            timeout=gemini_timeout,
+        )
+
+    update_cache_from_snapshot(
+        cache, board_id, posts_in_list,
+        now_iso=now_iso,
+        fetch_body=_fetch_body,
+        summarize_fn=_summarize,
+    )
+
+    pruned = prune_stale(cache, board_id, now_iso=now_iso, ttl_days=ttl_days)
+    if pruned:
+        log.info("calendar.cache_pruned board=%s count=%d", board_id, pruned)
+
+    cache.updated_at = now_iso
+    save_post_cache(cache_path, cache)
+
+    overrides = load_manual_overrides(manual_path)
+    return build_events(cache, overrides, today=today)
