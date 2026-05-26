@@ -98,6 +98,14 @@
     </div>
   </div>
 
+  <div
+    id="event-tooltip"
+    class="event-tooltip"
+    role="tooltip"
+    hidden
+    aria-hidden="true"
+  ></div>
+
   <script>
     (function () {
       // ─── Legend collapse toggle (P0-2) ──────────────────────────
@@ -120,6 +128,21 @@
             // localStorage blocked (private mode) — ignore, state lives in memory
           }
         });
+      }
+
+      // Canonical category → (short chip text, machine-readable token)
+      // Keep keys in sync with src/cse_bot/category.py CLASSIFICATION_PALETTE.
+      const categoryMeta = {
+        "장학/등록":  { short: "장학",   key: "scholarship" },
+        "학업/수강":  { short: "학업",   key: "academic" },
+        "졸업/진로":  { short: "졸업",   key: "career" },
+        "비교과/활동": { short: "비교과", key: "extracurricular" },
+        "일반공지":   { short: "공지",   key: "notice" },
+      };
+      const defaultCategoryMeta = { short: "공지", key: "notice" };
+
+      function metaFor(cat) {
+        return categoryMeta[cat] || defaultCategoryMeta;
       }
 
       // 5-category canonical palette — keep in sync with src/cse_bot/category.py
@@ -199,6 +222,45 @@
         if (e.key === "Escape" && !modal.hidden) hideModal();
       });
 
+      // ─── Shared event tooltip (P0-1c) ────────────────────────────
+      const tooltipEl = document.getElementById("event-tooltip");
+      let tooltipTimer = null;
+
+      function positionTooltip(anchor) {
+        const rect = anchor.getBoundingClientRect();
+        const tipRect = tooltipEl.getBoundingClientRect();
+        const top = window.scrollY + rect.bottom + 6;
+        let left = window.scrollX + rect.left;
+        const maxLeft = window.scrollX + document.documentElement.clientWidth - tipRect.width - 8;
+        if (left > maxLeft) left = Math.max(8, maxLeft);
+        tooltipEl.style.top = `${top}px`;
+        tooltipEl.style.left = `${left}px`;
+      }
+
+      function showTooltip(anchor, text) {
+        if (!tooltipEl || !text) return;
+        clearTimeout(tooltipTimer);
+        tooltipTimer = setTimeout(() => {
+          tooltipEl.textContent = text;
+          tooltipEl.hidden = false;
+          tooltipEl.setAttribute("aria-hidden", "false");
+          positionTooltip(anchor);
+          tooltipEl.setAttribute("data-visible", "true");
+        }, 250);
+      }
+
+      function hideTooltip() {
+        clearTimeout(tooltipTimer);
+        if (!tooltipEl) return;
+        tooltipEl.removeAttribute("data-visible");
+        tooltipEl.hidden = true;
+        tooltipEl.setAttribute("aria-hidden", "true");
+      }
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") hideTooltip();
+      });
+
       const calendarEl = document.getElementById("calendar");
       const calendar = new FullCalendar.Calendar(calendarEl, {
         locale: "ko",
@@ -214,28 +276,53 @@
           list: "목록",
         },
         dayMaxEvents: 3,
+        moreLinkClick: "popover",
+        moreLinkText: (n) => `+ ${n}건 더보기`,
         displayEventTime: false,
         events: "./events.json",
         eventDidMount: function (info) {
-          const cat = info.event.extendedProps.category || "";
+          const cat = info.event.extendedProps.category || "일반공지";
+          const meta = metaFor(cat);
           const important = !!info.event.extendedProps.important;
-          // Tooltip keeps the raw classification + ★ marker for context.
+          const stripped = stripPrefix(info.event.title);
+
+          // a11y / native tooltip fallback
           info.el.setAttribute(
             "title",
-            (important ? "★ " : "") + info.event.title + (cat ? ` [${cat}]` : "")
+            (important ? "★ " : "") + info.event.title + ` [${cat}]`
           );
+          info.el.setAttribute(
+            "aria-label",
+            `${meta.short} 카테고리, ${stripped}` + (important ? ", 중요 일정" : "")
+          );
+          info.el.setAttribute("data-category", meta.key);
           if (important) info.el.classList.add("fc-event-important");
 
-          // Visible display: strip [장학] etc and optionally prepend ★.
-          // Applies to both grid view (.fc-event-title) and list view.
-          const target =
+          // Rebuild chip contents: [tag][title (2-line clamp)]
+          const titleTarget =
             info.el.querySelector(".fc-event-title") ||
             info.el.querySelector(".fc-list-event-title a") ||
             info.el.querySelector(".fc-list-event-title");
-          if (target) {
-            const stripped = stripPrefix(target.textContent);
-            target.textContent = (important ? "★ " : "") + stripped;
+          if (titleTarget) {
+            titleTarget.classList.add("event-chip__title");
+            titleTarget.textContent = (important ? "★ " : "") + stripped;
           }
+
+          // In grid view, prepend the category tag chip if not present
+          const mainEl = info.el.querySelector(".fc-event-main-frame") || info.el.querySelector(".fc-event-main");
+          if (mainEl && !mainEl.querySelector(".chip-tag")) {
+            const tag = document.createElement("span");
+            tag.className = "chip-tag";
+            tag.textContent = meta.short;
+            mainEl.insertBefore(tag, mainEl.firstChild);
+          }
+
+          const fullText = (important ? "★ " : "") + stripped + ` · [${cat}]`;
+          info.el.setAttribute("aria-describedby", "event-tooltip");
+          info.el.addEventListener("mouseenter", () => showTooltip(info.el, fullText));
+          info.el.addEventListener("mouseleave", hideTooltip);
+          info.el.addEventListener("focus", () => showTooltip(info.el, fullText));
+          info.el.addEventListener("blur", hideTooltip);
         },
         eventClick: function (info) {
           info.jsEvent.preventDefault();
