@@ -40,6 +40,24 @@ class _RetryableNotifyError(Exception):
 
 DISCORD_MAX = 2000
 
+# Discord embed accent colors keyed to deadline urgency.
+URGENT_RED_HEX = 0xDC2626   # D-≤3
+NEAR_AMBER_HEX = 0xF59E0B   # D-≤7
+DEFAULT_EMBED_HEX = 0x5865F2  # blurple — no upcoming or far-out
+
+CATEGORY_COLOR_HEX: dict[str, int] = {
+    "장학/등록":  0x6D3FCF,
+    "학업/수강":  0x0D8A7E,
+    "졸업/진로":  0xC93A7F,
+    "비교과/활동": 0xC97D05,
+    "일반공지":   0x4B5563,
+}
+
+# Max upcoming deadlines surfaced as embed fields. Discord allows 25 max;
+# we cap lower to keep the message compact and stay under embed total
+# character limits.
+MAX_DEADLINE_FIELDS = 5
+
 
 def format_message(post: Post, fmt: Format, summary: str | None = None) -> str:
     if fmt == "minimal":
@@ -208,36 +226,105 @@ def send_alert(message: str, *, webhook_url: str, timeout: float = 5.0) -> None:
 # ─── Daily digest (calendar + 1-line new posts) ──────────────────────────
 
 
+def _safe_iso_date(s: str) -> date | None:
+    try:
+        return date.fromisoformat(s)
+    except ValueError:
+        return None
+
+
+def _strip_category_prefix(title: str) -> str:
+    """Drop a leading ``[카테고리]`` tag so it doesn't double up with the chip."""
+    if title.startswith("[") and "]" in title:
+        return title[title.index("]") + 1:].strip()
+    return title
+
+
+def _pick_accent_color(upcoming: list[TrackedDeadline], today: date) -> int:
+    """Pick an embed color signaling urgency at-a-glance in the channel list."""
+    if not upcoming:
+        return DEFAULT_EMBED_HEX
+    first = upcoming[0]
+    d_date = _safe_iso_date(first.date)
+    if d_date is None:
+        return DEFAULT_EMBED_HEX
+    delta = (d_date - today).days
+    if delta <= 3:
+        return URGENT_RED_HEX
+    if delta <= 7:
+        return NEAR_AMBER_HEX
+    return CATEGORY_COLOR_HEX.get(first.category, DEFAULT_EMBED_HEX)
+
+
+def _build_deadline_fields(
+    upcoming: list[TrackedDeadline], today: date,
+) -> list[dict[str, object]]:
+    """Return Discord embed fields with clickable per-deadline links.
+
+    Each field is full-width (``inline=False``) so the link line stays
+    readable on mobile. The PNG strip above the fields already provides
+    the at-a-glance scan; fields exist to make each title clickable.
+    """
+    fields: list[dict[str, object]] = []
+    for d in upcoming[:MAX_DEADLINE_FIELDS]:
+        d_date = _safe_iso_date(d.date)
+        if d_date is None:
+            continue
+        delta = (d_date - today).days
+        if delta < 0:
+            continue
+        prefix = "🔥" if delta <= 3 else "📌"
+        if delta == 0:
+            d_tag = "오늘 마감"
+        elif delta == 1:
+            d_tag = "D-1"
+        else:
+            d_tag = f"D-{delta}"
+        title = _strip_category_prefix(d.title)
+        if d.important:
+            title = f"★ {title}"
+        category_label = d.category or "일반공지"
+        fields.append({
+            "name": f"{prefix} {d_tag} · {category_label}",
+            "value": (
+                f"**{title}**\n"
+                f"📅 {d.date} · [원문 보기 →]({d.url})"
+            ),
+            "inline": False,
+        })
+    return fields
+
+
 def _format_upcoming_description(
     upcoming: list[TrackedDeadline], today: date
 ) -> str:
-    """Format embed description: 임박 마감 top 3 + D-1 reminder line."""
+    """Concise embed description — counts only.
+
+    Per-deadline detail lives in embed fields (with clickable links) and
+    the strip PNG above; the description just surfaces the headline so
+    the channel feed reveals urgency without an open-message scan.
+    """
     if not upcoming:
         return "_추적 중인 마감 없음._"
 
-    lines: list[str] = []
     tomorrow = today + timedelta(days=1)
-    d_minus_1 = [d for d in upcoming if d.date == tomorrow.isoformat()]
-    if d_minus_1:
-        lines.append(f"⏰ **내일 마감 (D-1) {len(d_minus_1)}건**")
-
-    for d in upcoming[:3]:
-        try:
-            d_date = date.fromisoformat(d.date)
-        except ValueError:
+    d_minus_1_count = sum(1 for d in upcoming if d.date == tomorrow.isoformat())
+    week_count = 0
+    for d in upcoming:
+        d_date = _safe_iso_date(d.date)
+        if d_date is None:
             continue
         delta = (d_date - today).days
-        if delta == 0:
-            tag = "**오늘 마감**"
-        elif delta == 1:
-            tag = "**D-1**"
-        elif delta < 0:
-            tag = "지남"
-        else:
-            tag = f"D-{delta}"
-        prefix = "🔥" if delta <= 3 else "📌"
-        lines.append(f"{prefix} {d.date} ({tag}) — {d.title}")
-    return "\n".join(lines)
+        if 0 <= delta <= 7:
+            week_count += 1
+
+    parts: list[str] = []
+    if d_minus_1_count:
+        parts.append(f"⏰ **내일 마감 (D-1) {d_minus_1_count}건**")
+    parts.append(
+        f"📌 D-7 이내 {week_count}건" if week_count else "이번 주 마감 없음"
+    )
+    return " · ".join(parts)
 
 
 def _format_new_posts_content(
@@ -298,19 +385,19 @@ def send_daily_digest(
     """
     del summaries  # not used yet; deadlines already cover the calendar story
 
-    embed = {
+    embed: dict[str, object] = {
         "title": f"📅 PNU CSE 마감일 캘린더 · {today.isoformat()}",
         "url": site_url,
-        "color": 0x5865F2,
+        "color": _pick_accent_color(upcoming, today),
         "image": {"url": f"{calendar_png_url}?t={_epoch_now()}"},
         "description": _format_upcoming_description(upcoming, today),
         "footer": {
-            "text": (
-                "각 칸 = 해당 날짜에 마감되는 공지 (공지 게시일 아님)"
-                " · 매일 18:00 갱신 · 클릭하면 웹 캘린더로 이동"
-            ),
+            "text": "매일 18:00 갱신 · 클릭하면 웹 캘린더로 이동",
         },
     }
+    fields = _build_deadline_fields(upcoming, today)
+    if fields:
+        embed["fields"] = fields
 
     content = _format_new_posts_content(new_posts, today)
     payload: dict[str, object] = {"embeds": [embed]}

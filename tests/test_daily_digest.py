@@ -9,7 +9,12 @@ import pytest
 import respx
 
 from cse_bot.models import Post, TrackedDeadline
-from cse_bot.notifier import send_daily_digest
+from cse_bot.notifier import (
+    DEFAULT_EMBED_HEX,
+    NEAR_AMBER_HEX,
+    URGENT_RED_HEX,
+    send_daily_digest,
+)
 
 WEBHOOK_A = "https://discord.com/api/webhooks/111/aaa"
 WEBHOOK_B = "https://discord.com/api/webhooks/222/bbb"
@@ -192,6 +197,144 @@ def test_partial_failure_reports_failed_url() -> None:
 
     assert ok == 1
     assert WEBHOOK_B in failed
+
+
+@respx.mock
+def test_fields_carry_clickable_links_per_deadline() -> None:
+    """Each upcoming deadline appears as an embed field with a clickable URL."""
+    route = respx.post(WEBHOOK_A).mock(return_value=httpx.Response(204))
+
+    ok, _ = send_daily_digest(
+        [WEBHOOK_A],
+        calendar_png_url=PNG_URL,
+        site_url=SITE_URL,
+        new_posts=[],
+        upcoming=[
+            _dl(1, title="[비교과] 오픈소스SW특강", date_str="2026-05-27",
+                category="비교과/활동"),
+            _dl(2, title="[장학] 국가근로장학금", date_str="2026-05-29",
+                category="장학/등록"),
+        ],
+        summaries={},
+        today=date(2026, 5, 26),
+        timeout=5.0,
+        retries=3,
+    )
+    assert ok == 1
+    body = json.loads(route.calls.last.request.content.decode("utf-8"))
+    embed = body["embeds"][0]
+    fields = embed.get("fields") or []
+    assert len(fields) == 2
+    # Field naming follows "<emoji> <D-N> · <category>"
+    assert "D-1" in fields[0]["name"]
+    assert "비교과/활동" in fields[0]["name"]
+    # Value contains the clickable hyperlink + canonical URL
+    assert "원문 보기" in fields[0]["value"]
+    assert "https://cse.pusan.ac.kr/post/1" in fields[0]["value"]
+    # Category prefix stripped from the title in the value
+    assert "**오픈소스SW특강**" in fields[0]["value"]
+
+
+@respx.mock
+def test_fields_omitted_when_no_upcoming() -> None:
+    route = respx.post(WEBHOOK_A).mock(return_value=httpx.Response(204))
+
+    send_daily_digest(
+        [WEBHOOK_A],
+        calendar_png_url=PNG_URL,
+        site_url=SITE_URL,
+        new_posts=[],
+        upcoming=[],
+        summaries={},
+        today=date(2026, 5, 26),
+        timeout=5.0,
+        retries=3,
+    )
+    body = json.loads(route.calls.last.request.content.decode("utf-8"))
+    embed = body["embeds"][0]
+    assert "fields" not in embed or embed["fields"] == []
+
+
+@respx.mock
+def test_fields_cap_at_five() -> None:
+    route = respx.post(WEBHOOK_A).mock(return_value=httpx.Response(204))
+
+    many = [
+        _dl(i, title=f"[학업] item {i}", date_str=f"2026-06-{i:02d}",
+            category="학업/수강")
+        for i in range(1, 11)
+    ]
+    send_daily_digest(
+        [WEBHOOK_A],
+        calendar_png_url=PNG_URL,
+        site_url=SITE_URL,
+        new_posts=[],
+        upcoming=many,
+        summaries={},
+        today=date(2026, 5, 26),
+        timeout=5.0,
+        retries=3,
+    )
+    body = json.loads(route.calls.last.request.content.decode("utf-8"))
+    fields = body["embeds"][0].get("fields") or []
+    assert len(fields) == 5
+
+
+@respx.mock
+def test_color_urgent_red_when_d_minus_3_or_less() -> None:
+    route = respx.post(WEBHOOK_A).mock(return_value=httpx.Response(204))
+
+    send_daily_digest(
+        [WEBHOOK_A],
+        calendar_png_url=PNG_URL,
+        site_url=SITE_URL,
+        new_posts=[],
+        upcoming=[_dl(1, date_str="2026-05-27")],  # tomorrow → D-1
+        summaries={},
+        today=date(2026, 5, 26),
+        timeout=5.0,
+        retries=3,
+    )
+    body = json.loads(route.calls.last.request.content.decode("utf-8"))
+    assert body["embeds"][0]["color"] == URGENT_RED_HEX
+
+
+@respx.mock
+def test_color_amber_when_d_minus_7_window() -> None:
+    route = respx.post(WEBHOOK_A).mock(return_value=httpx.Response(204))
+
+    send_daily_digest(
+        [WEBHOOK_A],
+        calendar_png_url=PNG_URL,
+        site_url=SITE_URL,
+        new_posts=[],
+        upcoming=[_dl(1, date_str="2026-06-02")],  # D-7 from 5/26
+        summaries={},
+        today=date(2026, 5, 26),
+        timeout=5.0,
+        retries=3,
+    )
+    body = json.loads(route.calls.last.request.content.decode("utf-8"))
+    assert body["embeds"][0]["color"] == NEAR_AMBER_HEX
+
+
+@respx.mock
+def test_color_default_when_no_upcoming() -> None:
+    route = respx.post(WEBHOOK_A).mock(return_value=httpx.Response(204))
+
+    send_daily_digest(
+        [WEBHOOK_A],
+        calendar_png_url=PNG_URL,
+        site_url=SITE_URL,
+        new_posts=[],
+        upcoming=[],
+        summaries={},
+        today=date(2026, 5, 26),
+        timeout=5.0,
+        retries=3,
+    )
+    body = json.loads(route.calls.last.request.content.decode("utf-8"))
+    assert body["embeds"][0]["color"] == DEFAULT_EMBED_HEX
 
 
 @respx.mock

@@ -21,7 +21,7 @@ from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 from zoneinfo import ZoneInfo
 
 from cse_bot import article, differ, fetcher, notifier, parser, reminder, state, summarizer
-from cse_bot.calendar_renderer import render_calendar_png
+from cse_bot.calendar_renderer import render_upcoming_strip
 from cse_bot.category import classify, is_important
 from cse_bot.config import Config, ConfigError, load_config
 from cse_bot.logging_setup import configure_logging
@@ -279,9 +279,7 @@ def _emit_daily_digest(
     out_dir.mkdir(parents=True, exist_ok=True)
     png_path = out_dir / "current.png"
     events_path = out_dir / "events.json"
-    render_calendar_png(
-        all_events, today, png_path, months=cfg.calendar.months_in_png,
-    )
+    render_upcoming_strip(all_events, today, png_path, top_n=5)
     write_events_json(all_events, events_path)
 
     try:
@@ -308,7 +306,7 @@ def _emit_daily_digest(
         log.warning("digest.no_webhooks")
         return
 
-    upcoming = all_events[:3]
+    upcoming = all_events[:5]
     ok, failed = notifier.send_daily_digest(
         webhook_urls,
         calendar_png_url=f"{cfg.calendar.site_url}/current.png",
