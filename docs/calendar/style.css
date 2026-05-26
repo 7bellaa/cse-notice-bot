@@ -756,3 +756,136 @@ main {
 @media (hover: none) {
   .event-tooltip { display: none; }
 }
+
+/* ─── Responsive layer (P0-3) ─────────────────────────────────── */
+
+html, body { overflow-x: hidden; }
+
+/* md: tablet portrait and small laptops */
+@media (max-width: 768px) {
+  main { margin: 16px auto; padding: 0 14px 64px; }
+  #calendar { padding: 14px; }
+  .hero { gap: 12px; margin: 4px 0 16px; }
+  .hero-word { font-size: 64px; }
+  .hero-tag { padding-bottom: 10px; font-size: 12px; }
+}
+
+/* sm: phones */
+@media (max-width: 480px) {
+  main { padding: 0 10px 56px; }
+  #calendar { padding: 10px; border-radius: var(--r-md); }
+  .hero-word { font-size: 48px; border-bottom-width: 4px; }
+  .hero-tag { display: none; }
+}
+
+/* ─── Header stack (P0-3b) ────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .site-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 14px 18px;
+  }
+  .site-head .meta {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .brand-subtitle {
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+}
+
+/* ─── Legend horizontal scroll on mobile (P0-3c) ──────────────── */
+
+@media (max-width: 768px) {
+  .legend-bar {
+    padding: 8px 10px;
+    margin: 12px 0 12px;
+    overflow: hidden;
+  }
+  .legend-bar__items {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    gap: 14px;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .legend-bar__items::-webkit-scrollbar { height: 4px; }
+  .legend-bar__items::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 2px;
+  }
+  .legend-chip { scroll-snap-align: start; }
+  .legend-bar__divider { display: none; }
+  .legend-bar__toggle-label { display: none; }
+  .legend-bar__toggle { padding: 6px; }
+}
+
+/* ─── Toolbar two-row + 44px touch targets (P0-3d) ────────────── */
+
+@media (max-width: 768px) {
+  .fc .fc-toolbar.fc-header-toolbar {
+    flex-direction: column;
+    gap: 8px;
+    align-items: stretch;
+    margin-bottom: 12px;
+  }
+  .fc .fc-toolbar-chunk {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .fc .fc-toolbar-title {
+    font-size: 16px;
+    text-align: center;
+  }
+  .fc .fc-button {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0 12px;
+    font-size: 14px;
+  }
+  .fc .fc-toolbar-chunk:first-child .fc-button-group { width: 100%; }
+}
+
+/* ─── List view polish (P0-3c) ────────────────────────────────── */
+.fc .fc-list {
+  background: var(--bg-card);
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.fc .fc-list-day-cushion {
+  background: var(--bg-subtle) !important;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 14px;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+.fc .fc-list-event {
+  cursor: pointer;
+}
+.fc .fc-list-event td {
+  padding: 12px 14px;
+  font-size: 14px;
+  min-height: 44px;
+}
+.fc .fc-list-event-dot { display: none; }
+.fc .fc-list-empty {
+  color: var(--text-secondary);
+  padding: 32px 16px;
+  text-align: center;
+}
+
+@media (max-width: 480px) {
+  .fc .fc-list-event-time {
+    display: none;
+  }
+}
