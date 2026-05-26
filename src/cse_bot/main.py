@@ -80,16 +80,18 @@ def run_cycle(config_path: Path) -> int:
     today = datetime.now(KST).date()
 
     overall_ok = True
-    per_board_new: list[tuple[BoardConfig, list[Post], dict[int, str]]] = []
+    per_board_full: list[
+        tuple[BoardConfig, list[Post], list[Post], dict[int, str]]
+    ] = []
     for board in cfg.boards:
         if not board.enabled:
             log.info("board.skip id=%s reason=disabled", board.id)
             continue
         try:
-            new_posts, summaries = _process_board(
+            posts, new_posts, summaries = _process_board(
                 board, cfg, state_map, state_path, today=today,
             )
-            per_board_new.append((board, new_posts, summaries))
+            per_board_full.append((board, posts, new_posts, summaries))
         except Exception as e:  # noqa: BLE001
             overall_ok = False
             log.exception("board.failed id=%s err=%s", board.id, e)
@@ -103,7 +105,7 @@ def run_cycle(config_path: Path) -> int:
     if cfg.calendar.enabled:
         try:
             _emit_daily_digest(
-                cfg, state_map, per_board_new, today=today, project_root=project_root,
+                cfg, state_map, per_board_full, today=today, project_root=project_root,
             )
         except Exception as e:  # noqa: BLE001
             overall_ok = False
@@ -111,7 +113,7 @@ def run_cycle(config_path: Path) -> int:
             _safe_alert(cfg, f"daily digest failed: {e}")
     else:
         # Legacy per-post text webhook + separate D-1 alerts.
-        if not _legacy_emit(cfg, state_map, per_board_new, today=today):
+        if not _legacy_emit(cfg, state_map, per_board_full, today=today):
             overall_ok = False
 
     state.save_state(state_path, state_map)
@@ -126,13 +128,14 @@ def _process_board(
     state_path: Path,
     *,
     today: date,
-) -> tuple[list[Post], dict[int, str]]:
+) -> tuple[list[Post], list[Post], dict[int, str]]:
     """Fetch + summarize new posts for *board*, updating state in place.
 
     Does not send any Discord messages — the caller decides how to surface
-    these (digest or legacy per-post). Returns the new posts discovered in
-    this cycle (in ascending id order) and a map of post_id → 1-line
-    summary preview.
+    these (digest or legacy per-post). Returns a 3-tuple of:
+    - all posts fetched from the list page (for the calendar snapshot)
+    - new posts discovered this cycle (in ascending id order)
+    - a map of post_id → 1-line summary preview
     """
     board_state = state_map.get(
         board.id, BoardState(last_max_post_id=None, last_checked="", empty_streak=0)
@@ -150,7 +153,7 @@ def _process_board(
                 " -- site structure may have changed",
             )
         state_map[board.id] = board_state
-        return [], {}
+        return [], [], {}
 
     board_state.empty_streak = 0
     page_max_id = max(p.id for p in posts)
@@ -160,7 +163,7 @@ def _process_board(
         board_state.last_checked = _now_iso()
         state_map[board.id] = board_state
         log.info("baseline.recorded board=%s watermark=%d", board.id, page_max_id)
-        return [], {}
+        return posts, [], {}
 
     new_posts: list[Post] = differ.diff(posts, watermark=board_state.last_max_post_id)
     log.info(
@@ -228,7 +231,7 @@ def _process_board(
 
     board_state.last_checked = _now_iso()
     state_map[board.id] = board_state
-    return new_posts, summaries
+    return posts, new_posts, summaries
 
 
 # ─── Digest mode (calendar enabled) ──────────────────────────────────────
@@ -237,29 +240,50 @@ def _process_board(
 def _emit_daily_digest(
     cfg: Config,
     state_map: dict[str, BoardState],
-    per_board_new: list[tuple[BoardConfig, list[Post], dict[int, str]]],
+    per_board_full: list[
+        tuple[BoardConfig, list[Post], list[Post], dict[int, str]]
+    ],
     *,
     today: date,
     project_root: Path,
 ) -> None:
-    """Render the calendar, publish web assets, send a single digest message."""
-    deadlines = [
-        d
-        for board_state in state_map.values()
-        for d in board_state.deadlines
-        if d.date >= today.isoformat()
-    ]
-    deadlines.sort(key=lambda d: d.date)
+    """Update snapshot cache, render calendar, send a single digest message."""
+    from cse_bot import calendar_publisher
+
+    now_iso = datetime.now(KST).isoformat(timespec="seconds")
+
+    cache_path = project_root / cfg.calendar.cache_path
+    manual_path = project_root / cfg.calendar.manual_overrides_path
+
+    all_events: list[TrackedDeadline] = []
+    for board, posts, _new_posts, _summaries in per_board_full:
+        if not board.enabled:
+            continue
+        events = calendar_publisher.run_calendar_publish(
+            board_id=board.id,
+            posts_in_list=posts,
+            today=today,
+            now_iso=now_iso,
+            cache_path=cache_path,
+            manual_path=manual_path,
+            ttl_days=cfg.calendar.cache_ttl_days,
+            gemini_api_key=cfg.gemini.api_key,
+            gemini_model=cfg.gemini.model,
+            gemini_timeout=cfg.gemini.timeout_seconds,
+            http_timeout=cfg.general.http_timeout_seconds,
+            http_retries=cfg.general.http_retries,
+        )
+        all_events.extend(events)
+    all_events.sort(key=lambda d: d.date)
 
     out_dir = project_root / cfg.calendar.output_dir
     out_dir.mkdir(parents=True, exist_ok=True)
-
     png_path = out_dir / "current.png"
     events_path = out_dir / "events.json"
     render_calendar_png(
-        deadlines, today, png_path, months=cfg.calendar.months_in_png,
+        all_events, today, png_path, months=cfg.calendar.months_in_png,
     )
-    write_events_json(deadlines, events_path)
+    write_events_json(all_events, events_path)
 
     try:
         published = git_publish(
@@ -270,14 +294,13 @@ def _emit_daily_digest(
         if published:
             log.info("calendar.git_published path=%s", out_dir)
     except RuntimeError as e:
-        # Don't abort the digest just because git push failed — log + alert.
         log.warning("calendar.git_publish_failed err=%s", e)
         _safe_alert(cfg, f"calendar git_publish failed: {e}")
 
     all_new_posts: list[Post] = []
     all_summaries: dict[int, str] = {}
-    for _board, posts, summaries in per_board_new:
-        all_new_posts.extend(posts)
+    for _board, _posts, new_posts, summaries in per_board_full:
+        all_new_posts.extend(new_posts)
         all_summaries.update(summaries)
 
     webhook_urls = cfg.all_webhook_urls()
@@ -285,7 +308,7 @@ def _emit_daily_digest(
         log.warning("digest.no_webhooks")
         return
 
-    upcoming = deadlines[:3]
+    upcoming = all_events[:3]
     ok, failed = notifier.send_daily_digest(
         webhook_urls,
         calendar_png_url=f"{cfg.calendar.site_url}/current.png",
@@ -312,13 +335,15 @@ def _emit_daily_digest(
 def _legacy_emit(
     cfg: Config,
     state_map: dict[str, BoardState],
-    per_board_new: list[tuple[BoardConfig, list[Post], dict[int, str]]],
+    per_board_full: list[
+        tuple[BoardConfig, list[Post], list[Post], dict[int, str]]
+    ],
     *,
     today: date,
 ) -> bool:
     """Per-post text webhooks + separate D-1 alerts (pre-calendar behavior)."""
     ok_overall = True
-    for board, new_posts, summaries in per_board_new:
+    for board, _posts, new_posts, summaries in per_board_full:
         try:
             urls = cfg.webhook_urls(board.id)
         except ConfigError:

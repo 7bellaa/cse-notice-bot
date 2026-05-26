@@ -63,6 +63,9 @@ enabled = true
 output_dir = "{tmp_path / 'docs/calendar'}"
 site_url = "https://example.com/calendar"
 months_in_png = 2
+cache_path = "{tmp_path / 'post_cache.json'}"
+manual_overrides_path = "{tmp_path / 'manual_deadlines.json'}"
+cache_ttl_days = 30
 
 [[boards]]
 id = "14221"
@@ -166,6 +169,10 @@ def test_digest_mode_baseline_skips_digest(
     respx.get(BOARD_URL).mock(
         return_value=httpx.Response(200, text=_html_with_posts([19234, 19233]))
     )
+    # calendar_publisher fetches articles for all list-page posts (returns 404 → skipped)
+    respx.get(host="cse.pusan.ac.kr", path__startswith="/cse/14221/artclView.do").mock(
+        return_value=httpx.Response(404)
+    )
     digest_route = respx.post(WEBHOOK).mock(return_value=httpx.Response(204))
 
     exit_code = run_cycle(cfg_file)
@@ -188,6 +195,10 @@ def test_digest_mode_no_new_posts_still_sends_calendar(
     respx.get(BOARD_URL).mock(
         return_value=httpx.Response(200, text=_html_with_posts([19234, 19233, 19232]))
     )
+    # calendar_publisher fetches articles for all list-page posts (returns 404 → skipped)
+    respx.get(host="cse.pusan.ac.kr", path__startswith="/cse/14221/artclView.do").mock(
+        return_value=httpx.Response(404)
+    )
     digest_route = respx.post(WEBHOOK).mock(return_value=httpx.Response(204))
 
     exit_code = run_cycle(cfg_file)
@@ -197,3 +208,132 @@ def test_digest_mode_no_new_posts_still_sends_calendar(
     body = json.loads(digest_route.calls.last.request.content.decode("utf-8"))
     assert "embeds" in body
     assert "content" not in body or body["content"] == ""
+
+
+@respx.mock
+def test_v2_digest_writes_post_cache_with_list_snapshot(
+    cfg_file: Path, tmp_path: Path
+) -> None:
+    """After a cycle, data/post_cache.json must contain an entry per list-page post."""
+    _seed_state(tmp_path / "state.json", last_max=19234)
+
+    # 3 posts on the list page — only 19235/19236 are above the watermark
+    respx.get(BOARD_URL).mock(
+        return_value=httpx.Response(200, text=_html_with_posts([19236, 19235, 19234]))
+    )
+    # Articles for ALL 3 (calendar inspects every list-page post)
+    article_html = (
+        "<html><body><div class='board-view'><div class='txt'>"
+        "본문 — 마감일은 2026-12-31</div></div></body></html>"
+    )
+    respx.get(host="cse.pusan.ac.kr", path__startswith="/cse/14221/artclView.do").mock(
+        return_value=httpx.Response(200, text=article_html)
+    )
+    # Gemini call — return the deadline
+    respx.post(host="generativelanguage.googleapis.com").mock(
+        return_value=httpx.Response(200, json={
+            "candidates": [{
+                "content": {"parts": [{"text": (
+                    '{"summary": "본문 요약", '
+                    '"short_summary": "12월 31일 마감", '
+                    '"deadline": "2026-12-31"}'
+                )}]}
+            }]
+        })
+    )
+    respx.post(WEBHOOK).mock(return_value=httpx.Response(204))
+
+    exit_code = run_cycle(cfg_file)
+    assert exit_code == 0
+
+    # post_cache.json should exist and contain all 3 list-page posts
+    cache_path = tmp_path / "post_cache.json"
+    assert cache_path.exists()
+    cache = json.loads(cache_path.read_text(encoding="utf-8"))
+    posts = cache["boards"]["14221"]["posts"]
+    assert set(posts.keys()) == {"19234", "19235", "19236"}
+    assert posts["19234"]["deadline"] == "2026-12-31"
+
+
+@respx.mock
+def test_v2_warm_cache_skips_gemini_calls(
+    cfg_file: Path, tmp_path: Path
+) -> None:
+    """With a pre-populated cache whose content_hash matches, Gemini is not called."""
+    from cse_bot.post_cache import PostCache, content_hash, save_post_cache
+    from cse_bot.models import PostCacheEntry
+
+    _seed_state(tmp_path / "state.json", last_max=19236)
+
+    body = "본문 — 마감일은 2026-12-31"
+    article_html = (
+        f"<html><body><div class='board-view'><div class='txt'>{body}</div></div></body></html>"
+    )
+    cache = PostCache()
+    cache.boards["14221"] = {
+        "19235": PostCacheEntry(
+            title="[장학] 제목 19235", url="https://cse.pusan.ac.kr/cse/14221/artclView.do?articleNo=19235",
+            content_hash=content_hash(body),
+            summarized_at="2026-05-01T00:00:00+09:00",
+            deadline="2026-12-31", category="장학/등록",
+            summary="cached", important=False,
+            last_seen="2026-05-25T00:00:00+09:00",
+        )
+    }
+    save_post_cache(tmp_path / "post_cache.json", cache)
+
+    respx.get(BOARD_URL).mock(
+        return_value=httpx.Response(200, text=_html_with_posts([19235]))
+    )
+    respx.get(host="cse.pusan.ac.kr", path__startswith="/cse/14221/artclView.do").mock(
+        return_value=httpx.Response(200, text=article_html)
+    )
+    gemini_route = respx.post(host="generativelanguage.googleapis.com").mock(
+        return_value=httpx.Response(200, json={
+            "candidates": [{
+                "content": {"parts": [{"text": '{"summary": "x"}'}]}
+            }]
+        })
+    )
+    respx.post(WEBHOOK).mock(return_value=httpx.Response(204))
+
+    exit_code = run_cycle(cfg_file)
+    assert exit_code == 0
+    assert gemini_route.call_count == 0  # warm cache hit
+
+
+@respx.mock
+def test_v2_manual_overrides_appear_in_events_json(
+    cfg_file: Path, tmp_path: Path
+) -> None:
+    """A manual_deadlines.json entry shows up in events.json even with empty cache."""
+    _seed_state(tmp_path / "state.json", last_max=19234)
+
+    (tmp_path / "manual_deadlines.json").write_text(
+        json.dumps({
+            "schema_version": 1,
+            "overrides": [
+                {
+                    "id": "m-1",
+                    "title": "수강신청 (1·2학년)",
+                    "url": "https://cse.pusan.ac.kr/manual-1",
+                    "date": "2026-08-19",
+                    "category": "학업/수강",
+                    "important": True,
+                },
+            ],
+        }),
+        encoding="utf-8",
+    )
+
+    # List is empty — only the manual override should surface
+    respx.get(BOARD_URL).mock(return_value=httpx.Response(200, text=_html_with_posts([])))
+    respx.post(WEBHOOK).mock(return_value=httpx.Response(204))
+
+    exit_code = run_cycle(cfg_file)
+    assert exit_code == 0
+    events = json.loads(
+        (tmp_path / "docs/calendar/events.json").read_text(encoding="utf-8")
+    )
+    titles = [e["title"] for e in events]
+    assert "수강신청 (1·2학년)" in titles
