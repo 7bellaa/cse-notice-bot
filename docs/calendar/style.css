@@ -540,3 +540,41 @@ main {
   .fc .fc-daygrid-event { font-size: 9px; padding: 1px 5px; }
   .fc .fc-col-header-cell { font-size: 10px; }
 }
+
+/* ─── FullCalendar contrast overrides (P0-4) ──────────────────── */
+
+/* Adjacent-month dates: visible but lower weight than current month. */
+.fc .fc-day-other .fc-daygrid-day-number {
+  color: var(--text-disabled);
+  opacity: 1;            /* FC ships 0.3 — too faint */
+}
+
+/* "Today" button — make active state legible */
+.fc .fc-today-button {
+  color: var(--btn-today-fg);
+  background-color: var(--btn-today-bg);
+  border-color: transparent;
+  font-weight: 500;
+}
+.fc .fc-today-button:disabled {
+  color: var(--text-tertiary);
+  background-color: transparent;
+  opacity: 1;
+}
+
+/* Toolbar buttons in general */
+.fc .fc-button-primary {
+  color: var(--text-secondary);
+  background-color: transparent;
+  border-color: var(--border);
+}
+.fc .fc-button-primary:hover {
+  color: var(--text);
+  background-color: var(--bg-hover);
+  border-color: var(--border);
+}
+.fc .fc-button-primary:not(:disabled).fc-button-active {
+  color: var(--text);
+  background-color: var(--accent-soft);
+  border-color: var(--accent);
+}
