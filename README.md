@@ -1,89 +1,155 @@
 # PNU CSE Discord Notification Bot
 
-부산대학교 정보컴퓨터공학부 학부 공지사항(`https://cse.pusan.ac.kr/cse/14221/subview.do`)을 매일 09:00, 18:00 KST에 점검하여 신규 게시글을 Discord webhook으로 알림합니다.
+부산대학교 정보컴퓨터공학부 학부 공지([`cse.pusan.ac.kr/cse/14221`](https://cse.pusan.ac.kr/cse/14221/subview.do))를 매일 18:00 KST에 점검해, **신규 공지 1줄 알림 + 마감 캘린더 PNG**를 하나의 Discord 메시지로 발송합니다. 같은 데이터는 GitHub Pages에 인터랙티브 캘린더로도 공개됩니다.
+
+- **Discord 채널**: `DISCORD_WEBHOOK_GENERAL`, `DISCORD_WEBHOOK_JOBLESS` 동시 fan-out
+- **웹 캘린더**: <https://7bellaa.github.io/cse-notice-bot/calendar/>
+- **알림 트리거**: launchd `StartCalendarInterval` 18:00, KST
+
+## Architecture
+
+매 사이클이 두 흐름을 공유 fetch에서 분기:
+
+```
+list page (cse.pusan.ac.kr/cse/14221)
+   ├─→ notifier         watermark 기반 신규 공지 → Discord 메시지
+   └─→ calendar_publisher (v2.0.0+)
+         ├─ post_cache.json   list snapshot + content_hash + 30d TTL
+         ├─ manual_deadlines.json   운영자 수동 override
+         └─ build_events → calendar PNG + events.json → GitHub Pages
+```
+
+- v1 (~v1.3): incremental watermark 단일 모델 — baseline 누락 + stale 누적 + ID 재할당에 취약 (v2 spec §0 참고).
+- v2.0.0+: 캘린더는 snapshot 모델로 분리. notifier 흐름은 v1 그대로.
+
+자세한 설계: `docs/superpowers/specs/2026-05-26-calendar-v2-snapshot-spec.md`.
 
 ## Requirements
-- macOS
-- Python 3.11+
-- Discord 서버 + 채널별 webhook URL
-- Gemini API key (AI 요약용)
-- (옵션) Gemini CLI — 개발 시 task 자동 리뷰용
+
+- macOS (launchd 사용)
+- Python 3.11+ + [`uv`](https://docs.astral.sh/uv/) (의존성 관리)
+- Discord 서버 + webhook URL 2개 + alert용 별도 webhook
+- Gemini API key (무료 티어로 충분)
 
 ## Setup
 
 ```bash
-git clone <this repo> ~/cseDiscordBot
+git clone https://github.com/7bellaa/cse-notice-bot.git ~/cseDiscordBot
 cd ~/cseDiscordBot
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -e ".[dev]"
+uv sync                              # 의존성 설치 (.venv 자동 생성)
 
 cp .env.example .env
-# .env 편집: DISCORD_WEBHOOK_GENERAL, DISCORD_WEBHOOK_ALERT, GEMINI_API_KEY 채우기
+# .env 편집: DISCORD_WEBHOOK_GENERAL, DISCORD_WEBHOOK_JOBLESS,
+#           DISCORD_WEBHOOK_ALERT, GEMINI_API_KEY 채우기
 
-# 베이스라인 실행 (알림 없이 현재 상태만 저장)
+# 1회 베이스라인 실행 (알림 없이 watermark만 기록)
 set -a; source .env; set +a
-python -m cse_bot.main --config config/config.toml
+.venv/bin/python -m cse_bot.main --config config/config.toml
 ```
 
-### Gemini API key (for AI summary)
+### Gemini API key
 
-1. Go to https://aistudio.google.com/ → "Get API key"
-2. Add to `.env`:
-   ```
-   GEMINI_API_KEY=<your-key>
-   ```
-3. Free tier (Gemini 2.5 Flash-Lite, ~1,000 requests/day) is sufficient for this bot.
+1. <https://aistudio.google.com/> → "Get API key" → 새 프로젝트 생성
+2. `.env`에 `GEMINI_API_KEY=AIza...` 추가
+3. 무료 티어 (Gemini 2.5 Flash-Lite, ~1,000 요청/일)는 봇 사용량의 100배 이상이라 카드 등록 불필요
 
-## launchd 등록
+### launchd 등록
 
 ```bash
-cp deploy/com.user.cse-bot.plist ~/Library/LaunchAgents/
-launchctl load ~/Library/LaunchAgents/com.user.cse-bot.plist
-launchctl list | grep cse-bot
+bash deploy/install.sh           # 첫 설치 + 1회 즉시 실행
+bash deploy/install.sh --no-run  # 18:00까지 대기
 ```
 
-즉시 1회 실행으로 동작 확인:
+`deploy/install.sh`는 idempotent — 매 `git pull` 후 다시 실행해 plist를 갱신해도 안전.
+
+## Calendar
+
+- **PNG**: 매일 18:00 cycle에서 Pillow로 2개월 다크 톤온톤 렌더, `docs/calendar/current.png` 갱신 후 git push → GitHub Pages.
+- **웹 사이트**: `docs/calendar/` 안의 정적 FullCalendar v6. `events.json`을 fetch해서 모달/카테고리 토글/모바일 list 뷰 지원.
+- **카테고리** (`category.py`): 장학/등록, 학업/수강, 졸업/진로, 비교과/활동, 일반공지 — 제목 prefix 매칭 + 키워드 fallback.
+- **마감 강조**: D-3 옅은 빨강, 당일 옅은 노랑, 오늘 셀 indigo 링, 중요 일정(수강신청·국가장학금 등) 골드 링.
+
+## 운영자 수동 override
+
+자동 추출이 잘못된 마감이나 게시판에 없는 일정을 캘린더에 강제로 넣고 싶을 때 `data/manual_deadlines.json` 편집:
+
+```json
+{
+  "schema_version": 1,
+  "overrides": [
+    {
+      "id": "manual-1",
+      "title": "수강신청 (1·2학년)",
+      "url": "https://cse.pusan.ac.kr/...",
+      "date": "2026-08-19",
+      "category": "학업/수강",
+      "important": true
+    }
+  ]
+}
+```
+
+같은 URL이 cache에도 있으면 manual override의 `date`/`category`/`important`가 우선합니다. 잘못된 JSON이면 자동 무시 + warning 로그.
+
+## v1.x → v2.0.0 마이그레이션
+
+v1 봇이 돌고 있던 머신에서 처음 v2를 띄울 때:
+
 ```bash
-launchctl start com.user.cse-bot
-tail -f logs/cse_bot.log
+cp data/state.json data/state.json.v1-backup
+cp docs/calendar/events.json /tmp/events-pre-v2.json   # (있다면)
+
+.venv/bin/python scripts/migrate_to_v2.py --dry-run    # 변환 카운트 확인
+.venv/bin/python scripts/migrate_to_v2.py              # 적용
+
+launchctl kickstart -k gui/$(id -u)/com.user.cse-bot   # 첫 사이클 실행
+sleep 30
+tail -50 logs/launchd.stderr.log                       # 'calendar.cache_update' 라인 확인
+
+diff <(jq -S . /tmp/events-pre-v2.json) \
+     <(jq -S . docs/calendar/events.json)              # v1 superset 검증
 ```
 
-## 설정 변경
+첫 v2 사이클은 migrated 글을 한 번 재요약 (~$0.01). 다음 사이클부터 warm cache로 일일 Gemini 호출 < 10회.
 
-`config/config.toml`에서:
-- `notification.format` — `minimal` / `medium` / `detailed`
-- `[[boards]]` 섹션 추가로 게시판 확장 가능 (각 게시판의 `webhook_envs` 는 환경변수 이름 목록 — 여러 채널 fan-out 지원)
-- `[gemini]` 섹션: `api_key_env` (환경변수 이름), `model` (기본 `gemini-2.5-flash-lite`), `timeout_seconds`
+## 설정
+
+`config/config.toml`:
+
+| 키 | 설명 | 기본 |
+|---|---|---|
+| `[general].max_pages` | 매 cycle list fetch 페이지 수 | `3` |
+| `[notification].format` | 텍스트 알림 포맷 (`minimal`/`medium`/`detailed`) — legacy 모드에서만 사용 | `medium` |
+| `[gemini].model` | Gemini 모델 | `gemini-2.5-flash-lite` |
+| `[calendar].enabled` | 캘린더+digest 모드 켜기 | `true` |
+| `[calendar].cache_ttl_days` | list에서 사라진 글의 cache 보존 기간 | `30` |
+| `[calendar].months_in_png` | PNG에 그릴 월 수 | `2` |
+| `[[boards]]` 배열 | 게시판별 webhook 환경변수 fan-out | — |
 
 ## 운영 메모
-- macOS가 절전/꺼짐일 때 launchd 트리거를 놓칠 수 있음 → 09:00, 18:00에는 깨어 있어야 함
-- 로그: `logs/cse_bot.log` (회전 5MB×5)
-- 상태: `data/state.json` (워터마크). 손상 시 자동 백업 + 베이스라인 재시작
-- 사이트 구조 변경으로 파싱이 3회 연속 빈 결과면 `DISCORD_WEBHOOK_ALERT` 채널로 알림
+
+- **로그**: `logs/cse_bot.log` (5MB×5 회전), launchd stdout/stderr 별도.
+- **State**: `data/state.json` (watermark; notifier 전용), `data/post_cache.json` (캘린더 snapshot), `data/manual_deadlines.json` (override).
+- **자동 알람**: parse 빈 결과 3회 연속 → `DISCORD_WEBHOOK_ALERT`로 알림. cache 손상 JSON → 자동 백업 후 빈 cache로 fallback + alert.
+- **절전 주의**: 맥북이 18:00에 깨어 있어야 launchd 트리거가 작동.
 
 ## Development
 
 ```bash
-pytest --cov=cse_bot          # 테스트 + 커버리지
-ruff check src/ tests/         # 린트
-mypy src/                      # 타입 체크
+.venv/bin/python -m pytest -q            # 테스트 (현 238개)
+.venv/bin/python -m pytest --cov=cse_bot # 커버리지
+.venv/bin/python -m ruff check src/ tests/ scripts/
+.venv/bin/python -m mypy src/
 ```
 
-각 task 완료 시:
-```bash
-bash scripts/gemini_review.sh "docs/superpowers/plans/2026-04-30-pnu-cse-discord-bot.md#task-N"
-```
-PASS 받으면 다음 task로 진행. 10회 실패 시 사용자에게 보고 후 일시 중지.
-
-## 문서
-- 디자인 스펙: `docs/superpowers/specs/2026-04-30-pnu-cse-discord-bot-design.md`
-- 데이터 플로우 다이어그램: `docs/data-flow.md`
-- 구현 계획: `docs/superpowers/plans/2026-04-30-pnu-cse-discord-bot.md`
+설계/구현 문서:
+- `docs/superpowers/specs/` — 디자인 스펙 (v1 ~ v2.0.0)
+- `docs/superpowers/plans/` — task별 TDD 구현 계획
+- `CHANGELOG.md` — 릴리스 히스토리 + 마이그레이션 runbook
 
 ## Uninstall
 
 ```bash
-launchctl unload ~/Library/LaunchAgents/com.user.cse-bot.plist
+launchctl bootout gui/$(id -u)/com.user.cse-bot
 rm ~/Library/LaunchAgents/com.user.cse-bot.plist
 ```
