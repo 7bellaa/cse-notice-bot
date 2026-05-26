@@ -69,3 +69,27 @@ def test_saved_file_has_non_ascii_korean(tmp_path: Path) -> None:
     save_post_cache(path, cache)
     raw = path.read_text(encoding="utf-8")
     assert "장학" in raw  # not \uXXXX escaped
+
+
+def test_content_hash_is_stable_for_same_body() -> None:
+    from cse_bot.post_cache import content_hash
+    assert content_hash("hello world") == content_hash("hello world")
+
+
+def test_content_hash_differs_for_different_body() -> None:
+    from cse_bot.post_cache import content_hash
+    assert content_hash("a") != content_hash("b")
+
+
+def test_content_hash_prefix_is_sha256() -> None:
+    from cse_bot.post_cache import content_hash
+    h = content_hash("x")
+    assert h.startswith("sha256:")
+    assert len(h) == len("sha256:") + 64  # hex digest
+
+
+def test_content_hash_normalises_whitespace() -> None:
+    """Trailing whitespace and collapsed runs must not change the hash."""
+    from cse_bot.post_cache import content_hash
+    assert content_hash("hello   world") == content_hash("hello world")
+    assert content_hash("hello world\n\n") == content_hash("hello world")

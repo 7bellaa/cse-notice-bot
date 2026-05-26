@@ -19,8 +19,10 @@ cycle will rebuild from the list page.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
+import re
 import shutil
 import time
 from dataclasses import dataclass, field
@@ -107,3 +109,17 @@ def save_post_cache(path: Path, cache: PostCache) -> None:
     tmp = path.with_suffix(path.suffix + ".tmp")
     tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     tmp.replace(path)
+
+
+_WHITESPACE_RE = re.compile(r"\s+")
+
+
+def content_hash(body: str) -> str:
+    """Return a stable sha256: prefixed hash of *body* after whitespace normalisation.
+
+    ``article.extract_body`` already collapses whitespace, but we re-normalise
+    defensively so the hash stays stable even if the parser changes.
+    """
+    normalised = _WHITESPACE_RE.sub(" ", body).strip()
+    digest = hashlib.sha256(normalised.encode("utf-8")).hexdigest()
+    return f"sha256:{digest}"
