@@ -312,23 +312,27 @@
           info.el.setAttribute("data-category", meta.key);
           if (important) info.el.classList.add("fc-event-important");
 
-          // Rebuild chip contents: [tag][title (2-line clamp)]
+          // Rebuild title node: inline-block chip-tag + flowing title text.
+          // Putting the chip INSIDE the title (not as a flex sibling) makes
+          // line-2 wrap naturally below the chip — filling the empty space
+          // under the tag — and -webkit-line-clamp can still clamp at 2 lines.
           const titleTarget =
             info.el.querySelector(".fc-event-title") ||
             info.el.querySelector(".fc-list-event-title a") ||
             info.el.querySelector(".fc-list-event-title");
-          if (titleTarget) {
+          if (titleTarget && !titleTarget.querySelector(".chip-tag")) {
             titleTarget.classList.add("event-chip__title");
-            titleTarget.textContent = (important ? "★ " : "") + stripped;
-          }
-
-          // In grid view, prepend the category tag chip if not present
-          const mainEl = info.el.querySelector(".fc-event-main-frame") || info.el.querySelector(".fc-event-main");
-          if (mainEl && !mainEl.querySelector(".chip-tag")) {
+            while (titleTarget.firstChild) {
+              titleTarget.removeChild(titleTarget.firstChild);
+            }
             const tag = document.createElement("span");
             tag.className = "chip-tag";
             tag.textContent = meta.short;
-            mainEl.insertBefore(tag, mainEl.firstChild);
+            titleTarget.appendChild(tag);
+            titleTarget.appendChild(document.createTextNode(" "));
+            titleTarget.appendChild(
+              document.createTextNode((important ? "★ " : "") + stripped),
+            );
           }
 
           const fullText = (important ? "★ " : "") + stripped + ` · [${cat}]`;
