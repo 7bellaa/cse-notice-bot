@@ -141,22 +141,17 @@ def update_cache_from_snapshot(
 
         result = summarize_fn(content.body, list(content.image_urls))
         if result is None:
-            if cached is None:
-                # Stub so we don't try to summarise this post every cycle.
-                board_posts[key] = PostCacheEntry(
-                    title=post.title,
-                    url=post.url,
-                    content_hash=new_hash,
-                    summarized_at="",
-                    deadline=None,
-                    category=classify(post.title),
-                    summary="",
-                    important=is_important(post.title),
-                    last_seen=now_iso,
-                )
-            else:
-                # Keep prior cache values; just refresh the hash so we don't loop.
-                cached.content_hash = new_hash
+            # Treat summarize failures as transient. Don't lock in a stub
+            # (its content_hash would match the body next cycle and skip
+            # the retry, freezing deadline=None) and don't refresh the
+            # prior entry's hash (same trap). The existing entry — if any
+            # — keeps its deadline; its last_seen was already bumped
+            # above, so TTL is safe. Next cycle's hash mismatch triggers
+            # a fresh attempt.
+            log.warning(
+                "calendar.summarize_failed board=%s post_id=%d (will retry next cycle)",
+                board_id, post.id,
+            )
             continue
 
         board_posts[key] = PostCacheEntry(
