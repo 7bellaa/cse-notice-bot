@@ -215,11 +215,6 @@ main {
   flex-shrink: 0;
 }
 
-.legend-chip__dot--ring {
-  background: transparent;
-  border: 2px solid rgb(245, 184, 0);
-}
-
 .legend-chip__label {
   white-space: nowrap;
 }
