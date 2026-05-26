@@ -18,5 +18,8 @@ logs/*.log*
 # OMC orchestration state (local dev only)
 .omc/
 
+# Brainstorming companion scratch (local dev only)
+.superpowers/
+
 # OS
 .DS_Store

@@ -31,6 +31,9 @@ class TrackedDeadline:
     url: str
     date: str        # ISO YYYY-MM-DD
     reminded: bool = False
+    category: str = ""   # 5대 분류 중 하나 (장학/등록, 학업/수강, 졸업/진로, 비교과/활동, 일반공지)
+    summary: str = ""    # Gemini가 추출한 1~2문장 요약 (모달 미리보기용)
+    important: bool = False  # 수강신청·국가장학금·대회·부트캠프·TOPCIT 등 중요 일정 강조
 
 
 @dataclass

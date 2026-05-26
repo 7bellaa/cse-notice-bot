@@ -1,4 +1,14 @@
-"""Single-cycle orchestrator entry point."""
+"""Single-cycle orchestrator entry point.
+
+Two output modes, selected by ``cfg.calendar.enabled``:
+
+- **Digest mode** (new, default): a single Discord message per cycle bundles
+  a rendered calendar PNG plus a 1-line bullet per new post. The PNG and an
+  ``events.json`` are also published to ``docs/calendar/`` so a static
+  FullCalendar site can render the same data.
+- **Legacy mode**: per-post text webhooks (preserved for backward
+  compatibility and tests). D-1 reminders are emitted as separate alerts.
+"""
 from __future__ import annotations
 
 import argparse
@@ -11,9 +21,12 @@ from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 from zoneinfo import ZoneInfo
 
 from cse_bot import article, differ, fetcher, notifier, parser, reminder, state, summarizer
+from cse_bot.calendar_renderer import render_calendar_png
+from cse_bot.category import classify, is_important
 from cse_bot.config import Config, ConfigError, load_config
 from cse_bot.logging_setup import configure_logging
 from cse_bot.models import BoardConfig, BoardState, Post, TrackedDeadline
+from cse_bot.web_publisher import git_publish, write_events_json
 
 log = logging.getLogger("cse_bot.main")
 
@@ -46,41 +59,295 @@ def _load_dotenv(env_path: Path) -> None:
 
 def run_cycle(config_path: Path) -> int:
     """Run one full check cycle. Returns exit code (0 = success, non-zero = error)."""
-    # Auto-load .env from project root (parent of config dir) so launchd-spawned
-    # processes get webhook URLs without manual `set -a; source .env`.
     project_root = config_path.resolve().parent.parent
     _load_dotenv(project_root / ".env")
 
     try:
         cfg = load_config(config_path)
     except ConfigError as e:
-        # Logging may not yet be configured; fall back to stderr.
         sys.stderr.write(f"CRITICAL config.error {e}\n")
         return 1
 
     configure_logging(Path(cfg.general.log_dir))
-    log.info("cycle.start config=%s", config_path)
+    log.info(
+        "cycle.start config=%s calendar=%s",
+        config_path,
+        "enabled" if cfg.calendar.enabled else "disabled",
+    )
 
     state_path = Path(cfg.general.state_file)
     state_map = state.load_state(state_path)
+    today = datetime.now(KST).date()
 
     overall_ok = True
+    per_board_new: list[tuple[BoardConfig, list[Post], dict[int, str]]] = []
     for board in cfg.boards:
         if not board.enabled:
             log.info("board.skip id=%s reason=disabled", board.id)
             continue
         try:
-            _process_board(board, cfg, state_map, state_path)
+            new_posts, summaries = _process_board(
+                board, cfg, state_map, state_path, today=today,
+            )
+            per_board_new.append((board, new_posts, summaries))
         except Exception as e:  # noqa: BLE001
             overall_ok = False
             log.exception("board.failed id=%s err=%s", board.id, e)
             _safe_alert(cfg, f"board {board.id} failed: {e}")
 
-    # Deadline reminders: prune expired, then send any D-1 reminders for today.
-    today = datetime.now(KST).date()
+    # Drop expired deadlines so the calendar window stays current.
     pruned = reminder.prune_expired(state_map, today=today)
     if pruned:
         log.info("deadlines.pruned count=%d", pruned)
+
+    if cfg.calendar.enabled:
+        try:
+            _emit_daily_digest(
+                cfg, state_map, per_board_new, today=today, project_root=project_root,
+            )
+        except Exception as e:  # noqa: BLE001
+            overall_ok = False
+            log.exception("digest.failed err=%s", e)
+            _safe_alert(cfg, f"daily digest failed: {e}")
+    else:
+        # Legacy per-post text webhook + separate D-1 alerts.
+        if not _legacy_emit(cfg, state_map, per_board_new, today=today):
+            overall_ok = False
+
+    state.save_state(state_path, state_map)
+    log.info("cycle.end ok=%s", overall_ok)
+    return 0 if overall_ok else 2
+
+
+def _process_board(
+    board: BoardConfig,
+    cfg: Config,
+    state_map: dict[str, BoardState],
+    state_path: Path,
+    *,
+    today: date,
+) -> tuple[list[Post], dict[int, str]]:
+    """Fetch + summarize new posts for *board*, updating state in place.
+
+    Does not send any Discord messages — the caller decides how to surface
+    these (digest or legacy per-post). Returns the new posts discovered in
+    this cycle (in ascending id order) and a map of post_id → 1-line
+    summary preview.
+    """
+    board_state = state_map.get(
+        board.id, BoardState(last_max_post_id=None, last_checked="", empty_streak=0)
+    )
+
+    posts = _fetch_posts_until_cutoff(board, cfg, board_state.last_max_post_id)
+
+    if not posts:
+        board_state.empty_streak += 1
+        log.warning("parse.empty board=%s streak=%d", board.id, board_state.empty_streak)
+        if board_state.empty_streak >= EMPTY_STREAK_ALERT_THRESHOLD:
+            _safe_alert(
+                cfg,
+                f"board {board.id} parsing returned empty {board_state.empty_streak} times"
+                " -- site structure may have changed",
+            )
+        state_map[board.id] = board_state
+        return [], {}
+
+    board_state.empty_streak = 0
+    page_max_id = max(p.id for p in posts)
+
+    if board_state.last_max_post_id is None:
+        board_state.last_max_post_id = page_max_id
+        board_state.last_checked = _now_iso()
+        state_map[board.id] = board_state
+        log.info("baseline.recorded board=%s watermark=%d", board.id, page_max_id)
+        return [], {}
+
+    new_posts: list[Post] = differ.diff(posts, watermark=board_state.last_max_post_id)
+    log.info(
+        "diff.computed board=%s watermark=%d new_count=%d",
+        board.id, board_state.last_max_post_id, len(new_posts),
+    )
+
+    summaries: dict[int, str] = {}
+
+    for post in new_posts:
+        content = article.fetch_article_content(
+            post.url,
+            timeout=cfg.general.http_timeout_seconds,
+            retries=cfg.general.http_retries,
+        )
+        body = content.body if content else ""
+        images = content.image_urls if content else []
+        result = (
+            summarizer.summarize(
+                body,
+                image_urls=images,
+                api_key=cfg.gemini.api_key,
+                model=cfg.gemini.model,
+                timeout=cfg.gemini.timeout_seconds,
+            )
+            if (body or images)
+            else None
+        )
+        if result and result.summary:
+            summaries[post.id] = result.summary
+
+        if result and result.deadline:
+            try:
+                d_date = date.fromisoformat(result.deadline)
+                if d_date > today:
+                    board_state.deadlines.append(
+                        TrackedDeadline(
+                            post_id=post.id,
+                            title=post.title,
+                            url=post.url,
+                            date=result.deadline,
+                            reminded=False,
+                            category=classify(post.title),
+                            summary=result.short_summary,
+                            important=is_important(post.title),
+                        )
+                    )
+            except ValueError:
+                log.warning(
+                    "deadline.invalid_format post_id=%d raw=%r",
+                    post.id, result.deadline,
+                )
+
+        # Advance watermark per-post so a mid-batch crash doesn't re-process
+        # already-summarized articles on the next cycle.
+        board_state.last_max_post_id = post.id
+        state_map[board.id] = board_state
+        state.save_state(state_path, state_map)
+        log.info(
+            "post.processed board=%s post_id=%d summary=%s deadline=%s",
+            board.id, post.id,
+            "yes" if post.id in summaries else "no",
+            result.deadline if (result and result.deadline) else "no",
+        )
+
+    board_state.last_checked = _now_iso()
+    state_map[board.id] = board_state
+    return new_posts, summaries
+
+
+# ─── Digest mode (calendar enabled) ──────────────────────────────────────
+
+
+def _emit_daily_digest(
+    cfg: Config,
+    state_map: dict[str, BoardState],
+    per_board_new: list[tuple[BoardConfig, list[Post], dict[int, str]]],
+    *,
+    today: date,
+    project_root: Path,
+) -> None:
+    """Render the calendar, publish web assets, send a single digest message."""
+    deadlines = [
+        d
+        for board_state in state_map.values()
+        for d in board_state.deadlines
+        if d.date >= today.isoformat()
+    ]
+    deadlines.sort(key=lambda d: d.date)
+
+    out_dir = project_root / cfg.calendar.output_dir
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    png_path = out_dir / "current.png"
+    events_path = out_dir / "events.json"
+    render_calendar_png(
+        deadlines, today, png_path, months=cfg.calendar.months_in_png,
+    )
+    write_events_json(deadlines, events_path)
+
+    try:
+        published = git_publish(
+            [out_dir],
+            message=f"auto: calendar update {today.isoformat()}",
+            cwd=project_root,
+        )
+        if published:
+            log.info("calendar.git_published path=%s", out_dir)
+    except RuntimeError as e:
+        # Don't abort the digest just because git push failed — log + alert.
+        log.warning("calendar.git_publish_failed err=%s", e)
+        _safe_alert(cfg, f"calendar git_publish failed: {e}")
+
+    all_new_posts: list[Post] = []
+    all_summaries: dict[int, str] = {}
+    for _board, posts, summaries in per_board_new:
+        all_new_posts.extend(posts)
+        all_summaries.update(summaries)
+
+    webhook_urls = cfg.all_webhook_urls()
+    if not webhook_urls:
+        log.warning("digest.no_webhooks")
+        return
+
+    upcoming = deadlines[:3]
+    ok, failed = notifier.send_daily_digest(
+        webhook_urls,
+        calendar_png_url=f"{cfg.calendar.site_url}/current.png",
+        site_url=cfg.calendar.site_url,
+        new_posts=all_new_posts,
+        upcoming=upcoming,
+        summaries=all_summaries,
+        today=today,
+        timeout=cfg.general.http_timeout_seconds,
+        retries=cfg.general.http_retries,
+    )
+    if failed:
+        _safe_alert(
+            cfg,
+            f"daily digest: {len(failed)}/{ok + len(failed)} webhooks failed",
+        )
+    if ok == 0:
+        raise RuntimeError("all webhooks failed for daily digest")
+
+
+# ─── Legacy mode (calendar disabled) ─────────────────────────────────────
+
+
+def _legacy_emit(
+    cfg: Config,
+    state_map: dict[str, BoardState],
+    per_board_new: list[tuple[BoardConfig, list[Post], dict[int, str]]],
+    *,
+    today: date,
+) -> bool:
+    """Per-post text webhooks + separate D-1 alerts (pre-calendar behavior)."""
+    ok_overall = True
+    for board, new_posts, summaries in per_board_new:
+        try:
+            urls = cfg.webhook_urls(board.id)
+        except ConfigError:
+            log.warning("legacy.no_webhooks board=%s", board.id)
+            continue
+        for post in new_posts:
+            ok_count, failed_urls = notifier.send_to_webhooks(
+                post,
+                webhook_urls=urls,
+                summary=summaries.get(post.id),
+                fmt=cfg.notification.format,
+                timeout=cfg.general.http_timeout_seconds,
+                retries=cfg.general.http_retries,
+            )
+            if ok_count == 0:
+                ok_overall = False
+                _safe_alert(cfg, f"post {post.id}: all webhooks failed")
+            if failed_urls:
+                _safe_alert(
+                    cfg,
+                    f"post {post.id}: {len(failed_urls)}/"
+                    f"{ok_count + len(failed_urls)} webhooks failed",
+                )
+            log.info(
+                "legacy.notify board=%s post_id=%d webhooks_ok=%d webhooks_failed=%d",
+                board.id, post.id, ok_count, len(failed_urls),
+            )
+
+    # Existing D-1 reminder dispatch (kept only in legacy mode).
     due = reminder.collect_due_reminders(state_map, today=today)
     for board_id, deadline in due:
         try:
@@ -107,126 +374,10 @@ def run_cycle(config_path: Path) -> int:
                 f"reminder for post {deadline.post_id}: "
                 f"{len(failed)}/{ok + len(failed)} webhooks failed",
             )
-
-    state.save_state(state_path, state_map)
-    log.info("cycle.end ok=%s", overall_ok)
-    return 0 if overall_ok else 2
+    return ok_overall
 
 
-def _process_board(
-    board: BoardConfig,
-    cfg: Config,
-    state_map: dict[str, BoardState],
-    state_path: Path,
-) -> None:
-    board_state = state_map.get(
-        board.id, BoardState(last_max_post_id=None, last_checked="", empty_streak=0)
-    )
-
-    posts = _fetch_posts_until_cutoff(board, cfg, board_state.last_max_post_id)
-
-    if not posts:
-        board_state.empty_streak += 1
-        log.warning("parse.empty board=%s streak=%d", board.id, board_state.empty_streak)
-        if board_state.empty_streak >= EMPTY_STREAK_ALERT_THRESHOLD:
-            _safe_alert(
-                cfg,
-                f"board {board.id} parsing returned empty {board_state.empty_streak} times"
-                " -- site structure may have changed",
-            )
-        state_map[board.id] = board_state
-        return
-
-    board_state.empty_streak = 0
-    page_max_id = max(p.id for p in posts)
-
-    if board_state.last_max_post_id is None:
-        board_state.last_max_post_id = page_max_id
-        board_state.last_checked = _now_iso()
-        state_map[board.id] = board_state
-        log.info("baseline.recorded board=%s watermark=%d", board.id, page_max_id)
-        return
-
-    new_posts: list[Post] = differ.diff(posts, watermark=board_state.last_max_post_id)
-    log.info(
-        "diff.computed board=%s watermark=%d new_count=%d",
-        board.id,
-        board_state.last_max_post_id,
-        len(new_posts),
-    )
-
-    webhook_urls = cfg.webhook_urls(board.id)
-    today = datetime.now(KST).date()
-
-    for post in new_posts:
-        content = article.fetch_article_content(
-            post.url,
-            timeout=cfg.general.http_timeout_seconds,
-            retries=cfg.general.http_retries,
-        )
-        body = content.body if content else ""
-        images = content.image_urls if content else []
-        result = (
-            summarizer.summarize(
-                body,
-                image_urls=images,
-                api_key=cfg.gemini.api_key,
-                model=cfg.gemini.model,
-                timeout=cfg.gemini.timeout_seconds,
-            )
-            if (body or images)
-            else None
-        )
-        summary = result.summary if result else None
-
-        ok_count, failed_urls = notifier.send_to_webhooks(
-            post,
-            webhook_urls=webhook_urls,
-            summary=summary,
-            fmt=cfg.notification.format,
-            timeout=cfg.general.http_timeout_seconds,
-            retries=cfg.general.http_retries,
-        )
-        if ok_count == 0:
-            raise notifier.NotifyError(
-                f"all webhooks failed for post {post.id}"
-            )
-        if failed_urls:
-            _safe_alert(
-                cfg,
-                f"post {post.id}: {len(failed_urls)}/"
-                f"{ok_count + len(failed_urls)} webhooks failed",
-            )
-
-        if result and result.deadline:
-            try:
-                d_date = date.fromisoformat(result.deadline)
-                if d_date > today:
-                    board_state.deadlines.append(
-                        TrackedDeadline(
-                            post_id=post.id, title=post.title, url=post.url,
-                            date=result.deadline, reminded=False,
-                        )
-                    )
-            except ValueError:
-                log.warning(
-                    "deadline.invalid_format post_id=%d raw=%r",
-                    post.id, result.deadline,
-                )
-
-        board_state.last_max_post_id = post.id
-        state_map[board.id] = board_state
-        state.save_state(state_path, state_map)
-        log.info(
-            "notify.ok board=%s post_id=%d webhooks_ok=%d webhooks_failed=%d "
-            "summary=%s deadline=%s",
-            board.id, post.id, ok_count, len(failed_urls),
-            "yes" if summary else "no",
-            result.deadline if (result and result.deadline) else "no",
-        )
-
-    board_state.last_checked = _now_iso()
-    state_map[board.id] = board_state
+# ─── Helpers ─────────────────────────────────────────────────────────────
 
 
 def _fetch_posts_until_cutoff(
@@ -243,8 +394,6 @@ def _fetch_posts_until_cutoff(
         try:
             page_posts = parser.parse(html)
         except parser.ParseEmptyError:
-            # Page 1 empty -> genuine empty/structure change. Page >1 empty ->
-            # treat as end of pagination and use what we already have.
             if page == 1:
                 return []
             break
@@ -289,7 +438,6 @@ def main(argv: list[str] | None = None) -> int:
     try:
         return run_cycle(args.config)
     except Exception as e:  # noqa: BLE001
-        # Last-line defence: log and try to alert.
         log.exception("cycle.unhandled err=%s", e)
         try:
             cfg = load_config(args.config)

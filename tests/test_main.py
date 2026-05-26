@@ -164,11 +164,14 @@ def test_partial_failure_preserves_progress(cfg_file: Path, tmp_path: Path) -> N
     respx.post(ALERT).mock(return_value=httpx.Response(204))
 
     exit_code = run_cycle(cfg_file)
-    # Cycle reports failure (non-zero), but state was advanced for the successful send.
+    # Cycle reports failure (non-zero) because one webhook failed.
+    # Watermark advances to the highest processed post regardless — the post is
+    # tracked in state even if its delivery failed, so we don't re-summarize it.
+    # The operator gets a self-alert about the failed webhook.
     assert exit_code != 0
 
     final = json.loads(state_path.read_text(encoding="utf-8"))
-    assert final["boards"]["14221"]["last_max_post_id"] == 19235
+    assert final["boards"]["14221"]["last_max_post_id"] == 19236
 
 
 @respx.mock

@@ -8,15 +8,15 @@
 
     <key>ProgramArguments</key>
     <array>
-        <string>/Users/7bella/cseDiscordBot/.venv/bin/python</string>
+        <string>/Users/7bellaa/cseDiscordBot/.venv/bin/python</string>
         <string>-m</string>
         <string>cse_bot.main</string>
         <string>--config</string>
-        <string>/Users/7bella/cseDiscordBot/config/config.toml</string>
+        <string>/Users/7bellaa/cseDiscordBot/config/config.toml</string>
     </array>
 
     <key>WorkingDirectory</key>
-    <string>/Users/7bella/cseDiscordBot</string>
+    <string>/Users/7bellaa/cseDiscordBot</string>
 
     <key>EnvironmentVariables</key>
     <dict>
@@ -24,23 +24,23 @@
         <string>1</string>
     </dict>
 
+    <!--
+      Single daily run at 18:00 (KST). The bot fetches new posts, renders the
+      calendar PNG, publishes events.json to docs/calendar/ (GitHub Pages),
+      and sends one digest message bundling the image + 1-line bullets for
+      any new posts discovered since the last cycle.
+    -->
     <key>StartCalendarInterval</key>
-    <array>
-        <dict>
-            <key>Hour</key><integer>9</integer>
-            <key>Minute</key><integer>0</integer>
-        </dict>
-        <dict>
-            <key>Hour</key><integer>18</integer>
-            <key>Minute</key><integer>0</integer>
-        </dict>
-    </array>
+    <dict>
+        <key>Hour</key><integer>18</integer>
+        <key>Minute</key><integer>0</integer>
+    </dict>
 
     <key>StandardOutPath</key>
-    <string>/Users/7bella/cseDiscordBot/logs/launchd.stdout.log</string>
+    <string>/Users/7bellaa/cseDiscordBot/logs/launchd.stdout.log</string>
 
     <key>StandardErrorPath</key>
-    <string>/Users/7bella/cseDiscordBot/logs/launchd.stderr.log</string>
+    <string>/Users/7bellaa/cseDiscordBot/logs/launchd.stderr.log</string>
 
     <key>RunAtLoad</key>
     <false/>

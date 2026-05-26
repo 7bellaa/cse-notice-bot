@@ -56,6 +56,9 @@ def load_state(path: Path) -> BoardStateMap:
                 url=str(d["url"]),
                 date=str(d["date"]),
                 reminded=bool(d.get("reminded", False)),
+                category=str(d.get("category", "")),
+                summary=str(d.get("summary", "")),
+                important=bool(d.get("important", False)),
             )
             for d in deadlines_raw
         ]
@@ -99,6 +102,9 @@ def save_state(path: Path, state: BoardStateMap) -> None:
                         "url": d.url,
                         "date": d.date,
                         "reminded": d.reminded,
+                        "category": d.category,
+                        "summary": d.summary,
+                        "important": d.important,
                     }
                     for d in s.deadlines
                 ],

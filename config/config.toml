@@ -14,6 +14,13 @@ api_key_env = "GEMINI_API_KEY"
 model = "gemini-2.5-flash-lite"
 timeout_seconds = 10
 
+[calendar]
+enabled = true
+output_dir = "docs/calendar"
+site_url = "https://7bellaa.github.io/cseDiscordBot/calendar"
+months_in_png = 2
+font_path = "assets/fonts/Pretendard-Medium.ttf"
+
 [[boards]]
 id = "14221"
 name = "정컴 일반공지"

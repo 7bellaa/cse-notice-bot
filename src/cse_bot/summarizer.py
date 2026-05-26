@@ -19,10 +19,12 @@ USER_AGENT = "cse-discord-bot/0.1"
 PROMPT_TEMPLATE = (
     "다음은 부산대학교 컴퓨터공학과 공지사항이다. "
     "본문 텍스트와 첨부 이미지(있으면 OCR 활용)를 종합해 학생 입장에서 알아야 할 "
-    "핵심 정보(날짜·시간·대상·방법)를 한국어 불릿 5줄 이내로 요약해라. "
-    "본문에 신청·접수·제출 마감일이 명시되어 있으면 deadline 필드에 "
-    "YYYY-MM-DD 형식으로 포함해라. 마감이 없거나 모호하면 null. "
-    "마감이 여러 개면 가장 빠른 것.\n\n"
+    "핵심 정보(날짜·시간·대상·방법)를 다음 세 가지 형식으로 함께 출력하라:\n"
+    "- summary: 한국어 불릿 5줄 이내 (자세히)\n"
+    "- short_summary: 한국어 1~2문장 (모달/툴팁 미리보기용, 누가/무엇을/언제 마감 위주). "
+    "  100자 이내 권장. 불릿/번호 없이 평문.\n"
+    "- deadline: 신청·접수·제출 마감일이 명시되어 있으면 YYYY-MM-DD 형식. "
+    "  없거나 모호하면 null. 여러 개면 가장 빠른 것.\n\n"
     "공지 본문:\n{body}"
 )
 
@@ -36,6 +38,7 @@ GENERATION_CONFIG = {
         "type": "object",
         "properties": {
             "summary": {"type": "string"},
+            "short_summary": {"type": "string"},
             "deadline": {"type": "string", "nullable": True},
         },
         "required": ["summary"],
@@ -47,6 +50,7 @@ GENERATION_CONFIG = {
 class SummaryResult:
     summary: str
     deadline: str | None
+    short_summary: str = ""
 
 
 def _guess_mime_type(url: str) -> str:
@@ -124,4 +128,6 @@ def summarize(
         return None
     deadline_raw = parsed.get("deadline")
     deadline = str(deadline_raw).strip() if deadline_raw else None
-    return SummaryResult(summary=summary, deadline=deadline)
+    short_raw = parsed.get("short_summary")
+    short_summary = str(short_raw).strip() if short_raw else ""
+    return SummaryResult(summary=summary, deadline=deadline, short_summary=short_summary)

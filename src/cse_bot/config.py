@@ -39,10 +39,20 @@ class GeminiConfig:
 
 
 @dataclass(frozen=True)
+class CalendarConfig:
+    enabled: bool
+    output_dir: str
+    site_url: str
+    months_in_png: int
+    font_path: str | None
+
+
+@dataclass(frozen=True)
 class Config:
     general: GeneralConfig
     notification: NotificationConfig
     gemini: GeminiConfig
+    calendar: CalendarConfig
     boards: list[BoardConfig]
     _webhook_urls: dict[str, list[str]]
     alert_webhook_url: str
@@ -53,6 +63,17 @@ class Config:
         except KeyError as e:
             raise ConfigError(f"no webhook resolved for board {board_id}") from e
 
+    def all_webhook_urls(self) -> list[str]:
+        """Return every distinct webhook URL across all boards (preserves order)."""
+        seen: set[str] = set()
+        out: list[str] = []
+        for urls in self._webhook_urls.values():
+            for url in urls:
+                if url not in seen:
+                    seen.add(url)
+                    out.append(url)
+        return out
+
 
 def load_config(path: Path) -> Config:
     if not path.exists():
@@ -62,6 +83,7 @@ def load_config(path: Path) -> Config:
     general = _load_general(raw)
     notification = _load_notification(raw)
     gemini = _load_gemini(raw)
+    calendar = _load_calendar(raw)
     boards = _load_boards(raw)
 
     webhook_urls: dict[str, list[str]] = {}
@@ -87,6 +109,7 @@ def load_config(path: Path) -> Config:
         general=general,
         notification=notification,
         gemini=gemini,
+        calendar=calendar,
         boards=boards,
         _webhook_urls=webhook_urls,
         alert_webhook_url=alert_url,
@@ -147,6 +170,37 @@ def _load_boards(raw: dict[str, Any]) -> list[BoardConfig]:
         except KeyError as e:
             raise ConfigError(f"[[boards]] index {i}: missing key {e.args[0]}") from e
     return boards
+
+
+def _load_calendar(raw: dict[str, Any]) -> CalendarConfig:
+    # Missing [calendar] section → disabled by default (backward compatible).
+    section = raw.get("calendar")
+    if section is None:
+        return CalendarConfig(
+            enabled=False,
+            output_dir="docs/calendar",
+            site_url="",
+            months_in_png=2,
+            font_path=None,
+        )
+    c: dict[str, Any] = section
+    enabled = bool(c.get("enabled", True))
+    output_dir = str(c.get("output_dir", "docs/calendar"))
+    site_url = str(c.get("site_url", "")).rstrip("/")
+    if enabled and not site_url:
+        raise ConfigError("[calendar].site_url is required when calendar.enabled = true")
+    months_in_png = int(c.get("months_in_png", 2))
+    if months_in_png < 1 or months_in_png > 6:
+        raise ConfigError("[calendar].months_in_png must be between 1 and 6")
+    font_path_raw = c.get("font_path")
+    font_path = str(font_path_raw) if font_path_raw else None
+    return CalendarConfig(
+        enabled=enabled,
+        output_dir=output_dir,
+        site_url=site_url,
+        months_in_png=months_in_png,
+        font_path=font_path,
+    )
 
 
 def _load_gemini(raw: dict[str, Any]) -> GeminiConfig:
