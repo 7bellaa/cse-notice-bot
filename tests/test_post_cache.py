@@ -93,3 +93,42 @@ def test_content_hash_normalises_whitespace() -> None:
     from cse_bot.post_cache import content_hash
     assert content_hash("hello   world") == content_hash("hello world")
     assert content_hash("hello world\n\n") == content_hash("hello world")
+
+
+def _entry(last_seen: str) -> PostCacheEntry:
+    return PostCacheEntry(
+        title="t", url="u", content_hash="",
+        summarized_at="", deadline="2026-12-31", category="",
+        summary="", important=False, last_seen=last_seen,
+    )
+
+
+def test_prune_stale_removes_old_entries() -> None:
+    from cse_bot.post_cache import PostCache, prune_stale
+    cache = PostCache()
+    cache.boards["14221"] = {
+        "1": _entry("2026-04-01T00:00:00+09:00"),  # 55d old
+        "2": _entry("2026-05-25T00:00:00+09:00"),  # 1d old
+    }
+    removed = prune_stale(cache, "14221", now_iso="2026-05-26T00:00:00+09:00", ttl_days=30)
+    assert removed == 1
+    assert "1" not in cache.boards["14221"]
+    assert "2" in cache.boards["14221"]
+
+
+def test_prune_stale_skips_unknown_board() -> None:
+    from cse_bot.post_cache import PostCache, prune_stale
+    cache = PostCache()
+    removed = prune_stale(cache, "doesnotexist", now_iso="2026-05-26T00:00:00+09:00", ttl_days=30)
+    assert removed == 0
+
+
+def test_prune_stale_keeps_boundary_entry() -> None:
+    """Entries exactly at the TTL boundary are NOT pruned (strict <)."""
+    from cse_bot.post_cache import PostCache, prune_stale
+    cache = PostCache()
+    cache.boards["14221"] = {
+        "1": _entry("2026-04-26T00:00:00+09:00"),  # exactly 30d
+    }
+    removed = prune_stale(cache, "14221", now_iso="2026-05-26T00:00:00+09:00", ttl_days=30)
+    assert removed == 0

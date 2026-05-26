@@ -26,6 +26,7 @@ import re
 import shutil
 import time
 from dataclasses import dataclass, field
+from datetime import datetime, timedelta
 from pathlib import Path
 
 from cse_bot.models import PostCacheEntry
@@ -123,3 +124,27 @@ def content_hash(body: str) -> str:
     normalised = _WHITESPACE_RE.sub(" ", body).strip()
     digest = hashlib.sha256(normalised.encode("utf-8")).hexdigest()
     return f"sha256:{digest}"
+
+
+def prune_stale(cache: PostCache, board_id: str, *, now_iso: str, ttl_days: int) -> int:
+    """Drop entries whose ``last_seen`` is older than ``ttl_days``.
+
+    ISO timestamps are sortable as strings when normalised to the same
+    timezone offset, so comparison stays O(n) and avoids parsing every
+    entry. Returns the number of evicted entries.
+    """
+    if board_id not in cache.boards:
+        return 0
+    now = datetime.fromisoformat(now_iso)
+    cutoff_iso = (now - timedelta(days=ttl_days)).isoformat()
+    posts = cache.boards[board_id]
+    removed = 0
+    for post_id in list(posts.keys()):
+        if posts[post_id].last_seen < cutoff_iso:
+            log.info(
+                "post_cache.evict board=%s post_id=%s reason=ttl",
+                board_id, post_id,
+            )
+            del posts[post_id]
+            removed += 1
+    return removed
