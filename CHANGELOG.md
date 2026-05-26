@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file.
 
+## v2.0.0 — 2026-05-27 — Snapshot Calendar
+
+### Breaking
+- Calendar data source moves from `state.deadlines` (incremental) to
+  `data/post_cache.json` (snapshot). Run `scripts/migrate_to_v2.py` once
+  before the first v2 cycle.
+
+### Added
+- `src/cse_bot/post_cache.py` — PostCache I/O, content_hash, TTL prune.
+- `src/cse_bot/manual_overrides.py` — operator-edited
+  `data/manual_deadlines.json` loader.
+- `src/cse_bot/calendar_publisher.py` — snapshot-driven cache update +
+  event list builder.
+- `scripts/migrate_to_v2.py` — one-off v1 → v2 data migration.
+- `[calendar].cache_path`, `[calendar].manual_overrides_path`,
+  `[calendar].cache_ttl_days` config keys (defaults preserve back-compat).
+- `[general].max_pages` bumped from 2 to 3 for safer long-horizon coverage.
+
+### Removed
+- `scripts/backfill_deadlines.py` — superseded by snapshot model.
+
+### Background
+- See `docs/superpowers/specs/2026-05-26-calendar-v2-snapshot-spec.md`.
+- v1.x suffered from baseline-blindness, stale accumulation, and
+  ID-reassignment double-counting. v2 fixes all three by mirroring the
+  list page each cycle instead of accumulating.
+
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
