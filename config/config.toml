@@ -1,7 +1,7 @@
 [general]
 log_dir = "logs"
 state_file = "data/state.json"
-max_pages = 2
+max_pages = 3
 http_timeout_seconds = 15
 http_retries = 3
 
@@ -20,6 +20,9 @@ output_dir = "docs/calendar"
 site_url = "https://7bellaa.github.io/cse-notice-bot/calendar"
 months_in_png = 2
 font_path = "assets/fonts/Pretendard-Medium.ttf"
+cache_path = "data/post_cache.json"
+manual_overrides_path = "data/manual_deadlines.json"
+cache_ttl_days = 30
 
 [[boards]]
 id = "14221"

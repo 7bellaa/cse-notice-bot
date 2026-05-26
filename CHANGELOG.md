@@ -2,6 +2,59 @@
 
 All notable changes to this project will be documented in this file.
 
+## v2.0.0 — 2026-05-27 — Snapshot Calendar
+
+### Breaking
+- Calendar data source moves from `state.deadlines` (incremental) to
+  `data/post_cache.json` (snapshot). Run `scripts/migrate_to_v2.py` once
+  before the first v2 cycle.
+
+### Operator runbook (one-time, on the production machine)
+
+```bash
+# 1. Backup current state
+cp data/state.json data/state.json.v1-backup
+cp docs/calendar/events.json /tmp/events-pre-v2.json
+
+# 2. Dry-run to confirm migration count
+.venv/bin/python scripts/migrate_to_v2.py --dry-run
+
+# 3. Apply migration
+.venv/bin/python scripts/migrate_to_v2.py
+
+# 4. Kick a cycle so warm cache populates content_hash
+launchctl kickstart -k gui/$(id -u)/com.user.cse-bot
+sleep 30
+tail -50 logs/launchd.stderr.log     # expect 'calendar.cache_update' lines
+
+# 5. Diff events.json — v2 should be a superset of v1
+diff <(jq -S . /tmp/events-pre-v2.json) <(jq -S . docs/calendar/events.json)
+```
+
+The first v2 cycle re-summarises every migrated post once (~$0.01 Gemini
+Flash Lite per spec §4.2); warm-cache behaviour resumes from the next
+cycle.
+
+### Added
+- `src/cse_bot/post_cache.py` — PostCache I/O, content_hash, TTL prune.
+- `src/cse_bot/manual_overrides.py` — operator-edited
+  `data/manual_deadlines.json` loader.
+- `src/cse_bot/calendar_publisher.py` — snapshot-driven cache update +
+  event list builder.
+- `scripts/migrate_to_v2.py` — one-off v1 → v2 data migration.
+- `[calendar].cache_path`, `[calendar].manual_overrides_path`,
+  `[calendar].cache_ttl_days` config keys (defaults preserve back-compat).
+- `[general].max_pages` bumped from 2 to 3 for safer long-horizon coverage.
+
+### Removed
+- `scripts/backfill_deadlines.py` — superseded by snapshot model.
+
+### Background
+- See `docs/superpowers/specs/2026-05-26-calendar-v2-snapshot-spec.md`.
+- v1.x suffered from baseline-blindness, stale accumulation, and
+  ID-reassignment double-counting. v2 fixes all three by mirroring the
+  list page each cycle instead of accumulating.
+
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]

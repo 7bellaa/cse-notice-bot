@@ -45,6 +45,9 @@ class CalendarConfig:
     site_url: str
     months_in_png: int
     font_path: str | None
+    cache_path: str
+    manual_overrides_path: str
+    cache_ttl_days: int
 
 
 @dataclass(frozen=True)
@@ -173,7 +176,6 @@ def _load_boards(raw: dict[str, Any]) -> list[BoardConfig]:
 
 
 def _load_calendar(raw: dict[str, Any]) -> CalendarConfig:
-    # Missing [calendar] section → disabled by default (backward compatible).
     section = raw.get("calendar")
     if section is None:
         return CalendarConfig(
@@ -182,6 +184,9 @@ def _load_calendar(raw: dict[str, Any]) -> CalendarConfig:
             site_url="",
             months_in_png=2,
             font_path=None,
+            cache_path="data/post_cache.json",
+            manual_overrides_path="data/manual_deadlines.json",
+            cache_ttl_days=30,
         )
     c: dict[str, Any] = section
     enabled = bool(c.get("enabled", True))
@@ -194,12 +199,22 @@ def _load_calendar(raw: dict[str, Any]) -> CalendarConfig:
         raise ConfigError("[calendar].months_in_png must be between 1 and 6")
     font_path_raw = c.get("font_path")
     font_path = str(font_path_raw) if font_path_raw else None
+    cache_path = str(c.get("cache_path", "data/post_cache.json"))
+    manual_overrides_path = str(
+        c.get("manual_overrides_path", "data/manual_deadlines.json")
+    )
+    cache_ttl_days = int(c.get("cache_ttl_days", 30))
+    if cache_ttl_days < 1:
+        raise ConfigError("[calendar].cache_ttl_days must be >= 1")
     return CalendarConfig(
         enabled=enabled,
         output_dir=output_dir,
         site_url=site_url,
         months_in_png=months_in_png,
         font_path=font_path,
+        cache_path=cache_path,
+        manual_overrides_path=manual_overrides_path,
+        cache_ttl_days=cache_ttl_days,
     )
 
 
