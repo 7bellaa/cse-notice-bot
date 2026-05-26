@@ -1,7 +1,22 @@
 import httpx
 import respx
 
-from cse_bot.summarizer import SummaryResult, summarize
+from cse_bot.summarizer import PROMPT_TEMPLATE, SummaryResult, summarize
+
+
+def test_prompt_covers_action_period_end_dates() -> None:
+    """Prompt must instruct Gemini to also treat 인정/모집/운영/신청 기간
+    종료일 as a deadline, not just classic 신청·접수·제출 마감일.
+
+    Real example that motivated this: 1388685 학과활동 안내 — body said
+    "인정 기간: 2026.03.02. ~ 2026.7.1." but the old prompt asked only
+    for "신청·접수·제출 마감일", so Gemini returned deadline=null and
+    the calendar missed 2026-07-01.
+    """
+    for token in ("인정 기간", "모집 기간", "운영 기간", "신청 기간"):
+        assert token in PROMPT_TEMPLATE, f"prompt missing coverage for '{token}'"
+    # Negative anchor: stale, narrow phrasing must not survive
+    assert "신청·접수·제출 마감일이 명시되어 있으면" not in PROMPT_TEMPLATE
 
 ENDPOINT_RE = (
     r"https://generativelanguage\.googleapis\.com/v1beta/models/"
