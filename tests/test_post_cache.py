@@ -1,7 +1,6 @@
 """Unit tests for the v2 post-snapshot cache."""
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
 from cse_bot.models import PostCacheEntry

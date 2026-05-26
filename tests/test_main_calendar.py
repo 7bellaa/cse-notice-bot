@@ -260,8 +260,8 @@ def test_v2_warm_cache_skips_gemini_calls(
     cfg_file: Path, tmp_path: Path
 ) -> None:
     """With a pre-populated cache whose content_hash matches, Gemini is not called."""
-    from cse_bot.post_cache import PostCache, content_hash, save_post_cache
     from cse_bot.models import PostCacheEntry
+    from cse_bot.post_cache import PostCache, content_hash, save_post_cache
 
     _seed_state(tmp_path / "state.json", last_max=19236)
 

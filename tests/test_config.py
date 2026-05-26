@@ -279,7 +279,9 @@ def test_load_config_rejects_empty_webhook_envs(tmp_path, monkeypatch):
         load_config(cfg_path)
 
 
-def test_calendar_config_has_v2_cache_paths(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_calendar_config_has_v2_cache_paths(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
     cfg_path = tmp_path / "config.toml"
     cfg_path.write_text("""
 [general]
@@ -325,7 +327,9 @@ enabled = true
     assert cfg.calendar.cache_ttl_days == 30
 
 
-def test_calendar_config_defaults_when_v2_keys_missing(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_calendar_config_defaults_when_v2_keys_missing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """Old configs without v2 keys still load (with sensible defaults)."""
     cfg_path = tmp_path / "config.toml"
     cfg_path.write_text("""
