@@ -314,3 +314,106 @@ write_events_json(validated, events_path)
 - 게시글 *수정* 추적: `last_modified` 헤더나 본문 hash로 변경 감지 → Gemini 재요약.
 - 캘린더에 "최종 검증" timestamp 표시 (각 칩 hover/tap 시).
 - 단위 테스트 커버리지 보고.
+
+---
+
+## 11. 추가 발견 — Baseline 정책 결함 (2026-05-26 23:00 KST)
+
+새 코드 배포 후 봇이 정상 동작했지만, `events.json`이 **4건만 publish**하는 상황이 관찰됨. 게시판 list page에는 마감일이 명시된 글이 다수 존재함에도 봇 state.json에는 없음.
+
+### 11.1 누락된 마감 글들 (관찰)
+| artclNo | 제목 | 본문 명시 마감 | list page | state.json |
+|---|---|---|---|---|
+| 1441440 | AI Booster 2기 (기간 연장) | 2026-05-31 | ✓ | ✗ |
+| 1441380 | 주거안정장학금 | 2026-06-22 | ✓ | ✗ |
+| 1441312 | 계절수업 폐강 + 수강정정 | 미상 | ✓ | ✗ |
+| 1441111 | 국가장학금 1차 | 2026-06-22 | ✓ | ✗ |
+| 1440913 | 오픈소스SW특강 | 미상 | ✓ | ✗ |
+| 1388562 | 졸업요건 서류 | 2026-07-10 | ✓ | ✗ |
+
+state.json의 4건은 baseline 이후 게시되어 옛 코드가 본 글들. 위 6건은 baseline 이전이거나 옛 코드가 deadline 추출에 실패한 글.
+
+### 11.2 근본 원인 — Watermark 첫 가동 정책
+
+`src/cse_bot/main.py:158-163`:
+```python
+if board_state.last_max_post_id is None:
+    board_state.last_max_post_id = page_max_id   # 첫 가동 = 현재 최신 ID로 baseline
+    board_state.last_checked = _now_iso()
+    state_map[board.id] = board_state
+    log.info("baseline.recorded board=%s watermark=%d", board.id, page_max_id)
+    return [], {}                                 # 신규 글 0개로 처리
+```
+
+봇이 처음 가동될 때 baseline = 현재 page의 최신 ID로 설정되고, 그 이후 새 글만 신규로 잡힘. 결과적으로 **첫 가동 시점에 이미 게시판에 있던 글들의 마감은 봇이 영원히 추적하지 못함**.
+
+이건 단순한 버그가 아니라 **명시적 설계 결정**이지만, 실제 운영에서 큰 단점이 드러난 상황:
+- 학사 일정상 *현재 진행 중인 마감*이 캘린더에서 누락
+- 사용자(학생)가 그 마감을 놓칠 위험
+- list page에는 분명히 보이는 글이 캘린더엔 없음 → 신뢰도 저하
+
+### 11.3 해결 방안
+
+**즉시 해결 — One-off backfill (선택 시점에 사용자가 실행)**
+- `scripts/backfill_deadlines.py` 신규: state.json의 `last_max_post_id`를 임의의 더 낮은 값으로 떨어뜨림 → 다음 cycle에 그 사이 글들을 모두 새로 fetch + Gemini로 deadline 추출.
+- 1회성 운영자 액션. 비용은 Gemini Flash Lite 30~50회 호출 (= 약 $0.01).
+- 부작용: 그 사이 글 모두에 대해 article body fetch 발생 → 게시판 측 부하 (50회 * 1초 sleep = 약 1분).
+
+**근본 해결 — INT-9 (v1.3.0 추가)**
+첫 가동(baseline=None) 시 즉시 baseline만 기록하고 끝내는 게 아니라:
+1. list page 1-2 페이지 *모두* fetch + summarize
+2. deadline이 추출된 글만 TrackedDeadline로 추가
+3. watermark는 page_max_id로 설정 (현재 그대로)
+4. 다음 cycle부터는 기존 동작 (신규 글만)
+
+또는 더 보수적:
+- 첫 가동 시 사용자 의도를 묻는 dry-run mode (`--bootstrap`) 도입
+- 사용자가 backfill을 원할 때만 그 모드로 1회 실행
+
+### 11.4 INT-9 / INT-10 (v1.3.0 추가 작업)
+
+| ID | 항목 | 우선순위 | 변경 파일 |
+|---|---|---|---|
+| INT-9 | 첫 가동 시 baseline backfill 옵션 | High | `src/cse_bot/main.py`, `src/cse_bot/config.py` |
+| INT-10 | `scripts/backfill_deadlines.py` 운영자 도구 | High | `scripts/backfill_deadlines.py` (신규) |
+
+#### INT-9 의사 코드
+```python
+# config.toml에 새 옵션
+[calendar]
+bootstrap_backfill = true   # 기본값 false (회귀 방지). true면 첫 가동 시 모든 보드 글 처리
+
+# main.py _process_board
+if board_state.last_max_post_id is None:
+    if cfg.calendar.bootstrap_backfill:
+        # 모든 page의 글을 신규 글로 취급해 처리
+        new_posts = posts  # baseline 안 잡고 전체 처리
+    else:
+        board_state.last_max_post_id = page_max_id
+        return [], {}
+```
+
+#### INT-10 — backfill 스크립트
+일회용 운영 도구. state.json의 watermark를 사용자가 지정한 floor로 낮춤. 그 후 사용자가 launchd kickstart로 봇 실행하면 자동으로 fetch + summarize 됨. (별도 commit 무관, state.json은 git-ignored)
+
+```bash
+python3 scripts/backfill_deadlines.py 1388000   # floor 인자
+# state.json의 last_max_post_id가 1388000으로 떨어짐
+launchctl kickstart -k gui/$(id -u)/com.user.cse-bot
+# 봇이 1388000 이상의 모든 글을 새 코드로 처리
+```
+
+### 11.5 즉시 조치 결정 — 2026-05-26 결정
+- 사용자가 **C(자연 만료)** 선택했지만, baseline 결함으로 *현재 진행 중인 마감 6건*이 누락된 것이 별개로 확인됨
+- 사용자 결정: **옵션 X (one-off backfill) 진행** — `scripts/backfill_deadlines.py` 작성 후 집 맥북에서 1회 실행
+- 결과 확인 후 INT-9 (recurring fix)는 v1.3.0 본 작업에서 처리
+
+---
+
+## 12. 학습 사항 (post-mortem 요약)
+
+1. **events.json과 state.json은 분리 관리** — 봇이 매 cycle 끝에 state로 events.json을 *덮어쓰는* 단방향이지만, 옛 events.json이 git에 남아 있으면 새 봇이 도착하기 전까지 그대로 노출됨.
+2. **봇 production binary가 옛 코드일 수 있음** — 푸시 ≠ 배포. 집 맥북에 git pull이 필요. `install.sh`로 자동화하면 한 줄로 끝.
+3. **watermark baseline은 큰 의사결정** — "첫 가동 시 모든 글을 backfill"이 직관적 기대인데, 실제 코드는 정반대로 동작. 사용자(운영자) 학습 비용 발생.
+4. **Discord 알림과 캘린더 데이터가 분리된 정보 흐름** — Discord에 "0건" 다이제스트가 가도 캘린더는 stale data로 노출되는 모순. publish-time validation 필요.
+5. **Public repo의 GitHub Pages는 즉시 외부 노출** — 데이터 정확성을 publish 직전에 검증해야 한다는 압박이 더 크다.
