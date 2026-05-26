@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PNU CSE 마감 캘린더</title>
+  <link rel="stylesheet" href="./style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/locales/ko.global.min.js"></script>
+</head>
+<body>
+  <header class="site-head">
+    <div class="brand">
+      📅 PNU CSE 마감 캘린더
+      <div class="brand-subtitle">각 일정은 해당 날짜에 마감되는 공지입니다 (공지 게시일 아님)</div>
+    </div>
+    <div class="meta">
+      <span id="event-count" class="badge">…건 마감 예정</span>
+      <a class="github-link" href="https://github.com/7bellaa/cseDiscordBot" target="_blank" rel="noopener">
+        ↗ GitHub
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" aria-label="마감일 캘린더">
+      <h1 class="hero-word">마감일</h1>
+      <span class="hero-tag">DEADLINE · 해당 날짜에 마감되는 공지</span>
+    </section>
+
+    <div class="legend-bar" id="legend-bar" aria-label="카테고리 색상 범례">
+      <div class="legend-bar__items" id="legend-bar-items">
+        <span class="legend-chip" data-category="scholarship">
+          <span class="legend-chip__dot" style="background:#8b5cf6"></span>
+          <span class="legend-chip__label">장학/등록</span>
+        </span>
+        <span class="legend-chip" data-category="academic">
+          <span class="legend-chip__dot" style="background:#14b8a6"></span>
+          <span class="legend-chip__label">학업/수강</span>
+        </span>
+        <span class="legend-chip" data-category="career">
+          <span class="legend-chip__dot" style="background:#ec4899"></span>
+          <span class="legend-chip__label">졸업/진로</span>
+        </span>
+        <span class="legend-chip" data-category="extracurricular">
+          <span class="legend-chip__dot" style="background:#f59e0b"></span>
+          <span class="legend-chip__label">비교과/활동</span>
+        </span>
+        <span class="legend-chip" data-category="notice">
+          <span class="legend-chip__dot" style="background:#6b7280"></span>
+          <span class="legend-chip__label">일반공지</span>
+        </span>
+        <span class="legend-bar__divider" aria-hidden="true"></span>
+        <span class="legend-chip">
+          <span class="legend-chip__dot legend-chip__dot--ring"></span>
+          <span class="legend-chip__label">★ 중요 일정</span>
+        </span>
+      </div>
+      <button
+        type="button"
+        class="legend-bar__toggle"
+        id="legend-toggle"
+        aria-controls="legend-bar-items"
+        aria-expanded="true"
+        title="범례 접기/펼치기"
+      >
+        <span class="legend-bar__toggle-label">접기</span>
+        <svg class="legend-bar__chevron" width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+          <path d="M3 5l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+
+    <div id="calendar"></div>
+  </main>
+
+  <!-- Event detail modal -->
+  <div id="modal" class="modal" hidden>
+    <div class="modal-backdrop" data-close></div>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal-head">
+        <div class="modal-tags">
+          <span id="modal-category" class="cat-badge">카테고리</span>
+          <span id="modal-important" class="important-badge" hidden>★ 중요</span>
+        </div>
+        <button class="modal-close" data-close aria-label="닫기">×</button>
+      </div>
+      <h2 id="modal-title">제목</h2>
+      <p id="modal-summary" class="modal-summary" hidden></p>
+      <div class="modal-row">
+        <span class="modal-label">마감</span>
+        <span id="modal-date">YYYY-MM-DD</span>
+        <span id="modal-dn" class="d-tag">D-?</span>
+      </div>
+      <div class="modal-actions">
+        <a id="modal-link" href="#" target="_blank" rel="noopener" class="btn-primary">원문 보기</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      // ─── Legend collapse toggle (P0-2) ──────────────────────────
+      const LEGEND_COLLAPSED_KEY = "legend.collapsed";
+      const legendBar = document.getElementById("legend-bar");
+      const legendToggle = document.getElementById("legend-toggle");
+      if (legendBar && legendToggle) {
+        const initiallyCollapsed =
+          localStorage.getItem(LEGEND_COLLAPSED_KEY) === "true";
+        if (initiallyCollapsed) {
+          legendBar.classList.add("legend-bar--collapsed");
+          legendToggle.setAttribute("aria-expanded", "false");
+        }
+        legendToggle.addEventListener("click", () => {
+          const collapsed = legendBar.classList.toggle("legend-bar--collapsed");
+          legendToggle.setAttribute("aria-expanded", String(!collapsed));
+          try {
+            localStorage.setItem(LEGEND_COLLAPSED_KEY, String(collapsed));
+          } catch (e) {
+            // localStorage blocked (private mode) — ignore, state lives in memory
+          }
+        });
+      }
+
+      // 5-category canonical palette — keep in sync with src/cse_bot/category.py
+      const palette = {
+        "장학/등록": "#8b5cf6",
+        "학업/수강": "#14b8a6",
+        "졸업/진로": "#ec4899",
+        "비교과/활동": "#f59e0b",
+        "일반공지": "#6b7280",
+      };
+      const defaultColor = "#6b7280";
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      function daysUntil(iso) {
+        const d = new Date(iso);
+        d.setHours(0, 0, 0, 0);
+        return Math.round((d - today) / 86400000);
+      }
+
+      function dTag(iso) {
+        const delta = daysUntil(iso);
+        if (delta < 0) return { text: "지남", className: "d-past" };
+        if (delta === 0) return { text: "오늘", className: "d-today" };
+        if (delta === 1) return { text: "D-1", className: "d-urgent" };
+        if (delta <= 3) return { text: `D-${delta}`, className: "d-urgent" };
+        if (delta <= 7) return { text: `D-${delta}`, className: "d-near" };
+        return { text: `D-${delta}`, className: "d-soft" };
+      }
+
+      function stripPrefix(title) {
+        const m = title.match(/^\s*\[[^\]]+\]\s*/);
+        return m ? title.slice(m[0].length) : title;
+      }
+
+      const modal = document.getElementById("modal");
+      const modalTitle = document.getElementById("modal-title");
+      const modalSummary = document.getElementById("modal-summary");
+      const modalDate = document.getElementById("modal-date");
+      const modalCategory = document.getElementById("modal-category");
+      const modalImportant = document.getElementById("modal-important");
+      const modalDn = document.getElementById("modal-dn");
+      const modalLink = document.getElementById("modal-link");
+
+      function showModal(event) {
+        const cat = event.extendedProps.category || "일반공지";
+        const summary = (event.extendedProps.summary || "").trim();
+        const important = !!event.extendedProps.important;
+        modalTitle.textContent = stripPrefix(event.title);
+        if (summary) {
+          modalSummary.textContent = summary;
+          modalSummary.hidden = false;
+        } else {
+          modalSummary.hidden = true;
+        }
+        modalDate.textContent = event.startStr;
+        modalCategory.textContent = cat;
+        modalCategory.style.backgroundColor = palette[cat] || defaultColor;
+        modalImportant.hidden = !important;
+        const tag = dTag(event.startStr);
+        modalDn.textContent = tag.text;
+        modalDn.className = `d-tag ${tag.className}`;
+        modalLink.href = event.url || "#";
+        modal.hidden = false;
+        document.body.style.overflow = "hidden";
+      }
+
+      function hideModal() {
+        modal.hidden = true;
+        document.body.style.overflow = "";
+      }
+      modal.addEventListener("click", (e) => {
+        if (e.target.matches("[data-close]")) hideModal();
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && !modal.hidden) hideModal();
+      });
+
+      const calendarEl = document.getElementById("calendar");
+      const calendar = new FullCalendar.Calendar(calendarEl, {
+        locale: "ko",
+        initialView: "dayGridMonth",
+        headerToolbar: {
+          left: "prev,next today",
+          center: "title",
+          right: "dayGridMonth,listMonth",
+        },
+        buttonText: {
+          today: "오늘",
+          month: "월",
+          list: "목록",
+        },
+        dayMaxEvents: 3,
+        displayEventTime: false,
+        events: "./events.json",
+        eventDidMount: function (info) {
+          const cat = info.event.extendedProps.category || "";
+          const important = !!info.event.extendedProps.important;
+          // Tooltip keeps the raw classification + ★ marker for context.
+          info.el.setAttribute(
+            "title",
+            (important ? "★ " : "") + info.event.title + (cat ? ` [${cat}]` : "")
+          );
+          if (important) info.el.classList.add("fc-event-important");
+
+          // Visible display: strip [장학] etc and optionally prepend ★.
+          // Applies to both grid view (.fc-event-title) and list view.
+          const target =
+            info.el.querySelector(".fc-event-title") ||
+            info.el.querySelector(".fc-list-event-title a") ||
+            info.el.querySelector(".fc-list-event-title");
+          if (target) {
+            const stripped = stripPrefix(target.textContent);
+            target.textContent = (important ? "★ " : "") + stripped;
+          }
+        },
+        eventClick: function (info) {
+          info.jsEvent.preventDefault();
+          showModal(info.event);
+        },
+        loading: function (isLoading) {
+          if (!isLoading) {
+            const evs = calendar.getEvents();
+            document.getElementById("event-count").textContent =
+              `${evs.length}건 마감 예정`;
+          }
+        },
+      });
+      calendar.render();
+    })();
+  </script>
+</body>
+</html>
