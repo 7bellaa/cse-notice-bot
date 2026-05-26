@@ -12,7 +12,10 @@ htmlcov/
 # Project runtime
 .env
 data/state.json
+data/post_cache.json
+data/manual_deadlines.json
 data/*.corrupt-*
+data/*.tmp
 logs/*.log*
 
 # OMC orchestration state (local dev only)
