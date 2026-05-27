@@ -48,6 +48,27 @@ CLASSIFICATION_PALETTE: dict[str, tuple[int, int, int]] = {
 
 DEFAULT_COLOR: tuple[int, int, int] = CLASSIFICATION_PALETTE[CATEGORY_GENERAL]
 
+# Darker chip variants so white text passes WCAG AA (≥ 4.5:1) against the
+# pill background. Used by both the PNG renderer (`calendar_renderer`) and
+# the Discord embed accent (`notifier`). Mirrored in docs/calendar/style.css.
+CHIP_TAG_PALETTE: dict[str, tuple[int, int, int]] = {
+    CATEGORY_SCHOLARSHIP: (109, 63, 207),   # #6d3fcf
+    CATEGORY_ACADEMIC:    (13, 138, 126),   # #0d8a7e
+    CATEGORY_CAREER:      (201, 58, 127),   # #c93a7f
+    CATEGORY_ACTIVITY:    (201, 125, 5),    # #c97d05
+    CATEGORY_GENERAL:     (75, 85, 99),     # #4b5563
+}
+CHIP_TAG_DEFAULT: tuple[int, int, int] = CHIP_TAG_PALETTE[CATEGORY_GENERAL]
+
+# Short labels used inside chip pills (PNG renderer + web `metaFor` map).
+CATEGORY_SHORT: dict[str, str] = {
+    CATEGORY_SCHOLARSHIP: "장학",
+    CATEGORY_ACADEMIC:    "학업",
+    CATEGORY_CAREER:      "졸업",
+    CATEGORY_ACTIVITY:    "비교과",
+    CATEGORY_GENERAL:     "공지",
+}
+
 # ─── Prefix → category mapping ───────────────────────────────────────────
 
 _PREFIX_TO_CATEGORY: dict[str, str] = {

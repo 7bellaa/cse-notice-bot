@@ -200,12 +200,12 @@ def run_calendar_publish(
     """
     cache = load_post_cache(cache_path)
 
-    def _fetch_body(url: str):
+    def _fetch_body(url: str) -> ArticleContent | None:
         return article.fetch_article_content(
             url, timeout=http_timeout, retries=http_retries,
         )
 
-    def _summarize(body: str, image_urls: list[str]):
+    def _summarize(body: str, image_urls: list[str]) -> SummaryResult | None:
         return summarizer.summarize(
             body,
             image_urls=image_urls,

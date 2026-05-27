@@ -14,11 +14,10 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
 from cse_bot.category import (
-    CATEGORY_ACADEMIC,
-    CATEGORY_ACTIVITY,
-    CATEGORY_CAREER,
     CATEGORY_GENERAL,
-    CATEGORY_SCHOLARSHIP,
+    CATEGORY_SHORT,
+    CHIP_TAG_DEFAULT,
+    CHIP_TAG_PALETTE,
 )
 from cse_bot.models import TrackedDeadline, safe_iso_date, strip_category_prefix
 
@@ -37,26 +36,6 @@ CARD_BORDER: tuple[int, int, int] = (30, 31, 34)          # #1e1f22
 CARD_TEXT: tuple[int, int, int] = (242, 243, 245)         # light on dark
 CARD_TEXT_SECONDARY: tuple[int, int, int] = (181, 186, 193)
 CARD_TEXT_MUTED: tuple[int, int, int] = (148, 155, 164)
-
-# Chip-tag colors — darker variants of the canonical palette so white text
-# passes WCAG AA (≥ 4.5:1) against them. Mirrors docs/calendar/style.css.
-CHIP_TAG_PALETTE: dict[str, tuple[int, int, int]] = {
-    CATEGORY_SCHOLARSHIP: (109, 63, 207),   # #6d3fcf
-    CATEGORY_ACADEMIC:    (13, 138, 126),   # #0d8a7e
-    CATEGORY_CAREER:      (201, 58, 127),   # #c93a7f
-    CATEGORY_ACTIVITY:    (201, 125, 5),    # #c97d05
-    CATEGORY_GENERAL:     (75, 85, 99),     # #4b5563
-}
-CHIP_TAG_DEFAULT: tuple[int, int, int] = CHIP_TAG_PALETTE[CATEGORY_GENERAL]
-
-# Short labels used inside the chip-tag pill (mirrors web `metaFor` map).
-CATEGORY_SHORT: dict[str, str] = {
-    CATEGORY_SCHOLARSHIP: "장학",
-    CATEGORY_ACADEMIC:    "학업",
-    CATEGORY_CAREER:      "졸업",
-    CATEGORY_ACTIVITY:    "비교과",
-    CATEGORY_GENERAL:     "공지",
-}
 
 # ─── Strip layout ────────────────────────────────────────────────────────
 STRIP_WIDTH = 880
@@ -90,7 +69,10 @@ def resolve_font_path() -> str | None:
     return None
 
 
-def _load_font(path: str | None, size: int) -> ImageFont.ImageFont:
+_Font = ImageFont.FreeTypeFont | ImageFont.ImageFont
+
+
+def _load_font(path: str | None, size: int) -> _Font:
     if path is None:
         return ImageFont.load_default()
     try:
@@ -100,11 +82,11 @@ def _load_font(path: str | None, size: int) -> ImageFont.ImageFont:
         return ImageFont.load_default()
 
 
-def _text_w(font: ImageFont.ImageFont, text: str) -> int:
+def _text_w(font: _Font, text: str) -> int:
     if not text:
         return 0
     bbox = font.getbbox(text)
-    return bbox[2] - bbox[0]
+    return int(bbox[2] - bbox[0])
 
 
 def _chip_tag_color(category: str) -> tuple[int, int, int]:
@@ -289,11 +271,11 @@ def _draw_strip_card(
     height: int,
     deadline: TrackedDeadline,
     delta: int,
-    d_label_font: ImageFont.ImageFont,
-    d_label_sub_font: ImageFont.ImageFont,
-    title_font: ImageFont.ImageFont,
-    chip_font: ImageFont.ImageFont,
-    meta_font: ImageFont.ImageFont,
+    d_label_font: _Font,
+    d_label_sub_font: _Font,
+    title_font: _Font,
+    chip_font: _Font,
+    meta_font: _Font,
 ) -> None:
     x0, y0 = x, y
     x1, y1 = x + width, y + height

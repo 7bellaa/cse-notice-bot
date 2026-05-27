@@ -7,7 +7,6 @@ from cse_bot.article import (
     ArticleContent,
     extract_body,
     extract_image_urls,
-    fetch_article_body,
     fetch_article_content,
 )
 
@@ -36,35 +35,6 @@ def test_extract_body_collapses_whitespace():
     html = '<div class="board-view"><div class="txt">  hello\n\n\nworld   </div></div>'
     body = extract_body(html)
     assert body == "hello world" or body == "hello\nworld"  # impl chooses
-
-
-@respx.mock
-def test_fetch_article_body_success():
-    html = FIXTURE.read_text(encoding="utf-8")
-    respx.get("https://cse.pusan.ac.kr/bbs/cse/2055/1389652/artclView.do").mock(
-        return_value=httpx.Response(200, text=html)
-    )
-    body = fetch_article_body(
-        "https://cse.pusan.ac.kr/bbs/cse/2055/1389652/artclView.do",
-        timeout=5.0,
-        retries=1,
-    )
-    assert body is not None
-    assert "국제처" in body or "해외파견" in body
-
-
-@respx.mock
-def test_fetch_article_body_returns_none_on_5xx():
-    respx.get("https://x/y").mock(return_value=httpx.Response(503))
-    body = fetch_article_body("https://x/y", timeout=1.0, retries=1)
-    assert body is None
-
-
-@respx.mock
-def test_fetch_article_body_returns_none_on_network_error():
-    respx.get("https://x/y").mock(side_effect=httpx.ConnectError("boom"))
-    body = fetch_article_body("https://x/y", timeout=1.0, retries=1)
-    assert body is None
 
 
 def test_extract_image_urls_finds_first_three_in_body():

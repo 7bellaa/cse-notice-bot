@@ -109,8 +109,11 @@
 
   <script>
     (function () {
-      // Canonical category → (short chip text, machine-readable token)
-      // Keep keys in sync with src/cse_bot/category.py CLASSIFICATION_PALETTE.
+      // Canonical category → (short chip text, machine-readable token).
+      // Single source of truth lives in src/cse_bot/category.py
+      // (CATEGORY_SHORT for `short`, CHIP_TAG_PALETTE for the chip color in
+      // calendar_renderer/notifier). Update this map when you add a category
+      // or rename a short label there.
       const categoryMeta = {
         "장학/등록":  { short: "장학",   key: "scholarship" },
         "학업/수강":  { short: "학업",   key: "academic" },
@@ -138,7 +141,8 @@
         try { sessionStorage.setItem(VIEW_PREF_KEY, viewName); } catch (e) {}
       }
 
-      // 5-category canonical palette — keep in sync with src/cse_bot/category.py
+      // 5-category canonical RGB palette mirrored from
+      // src/cse_bot/category.py:CLASSIFICATION_PALETTE. Update both together.
       const palette = {
         "장학/등록": "#8b5cf6",
         "학업/수강": "#14b8a6",

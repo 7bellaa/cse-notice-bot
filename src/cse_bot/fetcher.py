@@ -12,9 +12,9 @@ from tenacity import (
     wait_exponential,
 )
 
-log = logging.getLogger(__name__)
+from cse_bot._http import USER_AGENT
 
-USER_AGENT = "cse-discord-bot/0.1 (+https://github.com/local)"
+log = logging.getLogger(__name__)
 
 
 class FetchError(Exception):

@@ -15,18 +15,12 @@ from tenacity import (
     wait_exponential,
 )
 
-from cse_bot.calendar_renderer import (
-    CHIP_TAG_PALETTE,
-    NEAR_AMBER,
-    SOFT_BLUE,
-    URGENT_RED,
-)
-from cse_bot.category import extract_category, is_important
+from cse_bot._http import USER_AGENT
+from cse_bot.calendar_renderer import NEAR_AMBER, SOFT_BLUE, URGENT_RED
+from cse_bot.category import CHIP_TAG_PALETTE, extract_category, is_important
 from cse_bot.models import Post, TrackedDeadline, safe_iso_date, strip_category_prefix
 
 log = logging.getLogger(__name__)
-
-USER_AGENT = "cse-discord-bot/0.1"
 
 Format = Literal["minimal", "medium", "detailed"]
 

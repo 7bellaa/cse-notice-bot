@@ -195,7 +195,10 @@ def _process_board(
         if result and result.summary:
             summaries[post.id] = result.summary
 
-        if result and result.deadline:
+        # BoardState.deadlines only drives legacy D-1 reminders. In v2 digest
+        # mode the calendar reads from post_cache.json, so writing here would
+        # bloat state.json with never-read entries (still pruned each cycle).
+        if not cfg.calendar.enabled and result and result.deadline:
             try:
                 d_date = date.fromisoformat(result.deadline)
                 if d_date > today:

@@ -9,12 +9,13 @@ import json
 import logging
 from collections.abc import Sequence
 from dataclasses import dataclass
+from typing import Any
 
 import httpx
 
-log = logging.getLogger(__name__)
+from cse_bot._http import USER_AGENT
 
-USER_AGENT = "cse-discord-bot/0.1"
+log = logging.getLogger(__name__)
 
 PROMPT_TEMPLATE = (
     "다음은 부산대학교 컴퓨터공학과 공지사항이다. "
@@ -79,7 +80,7 @@ def summarize(
     if not body and not image_urls:
         return None
 
-    parts: list[dict] = [
+    parts: list[dict[str, Any]] = [
         {"text": PROMPT_TEMPLATE.format(body=body or "(본문 텍스트 없음)")}
     ]
     for url in image_urls:

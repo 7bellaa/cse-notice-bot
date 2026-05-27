@@ -93,24 +93,7 @@ bash deploy/install.sh --no-run  # 18:00까지 대기
 
 ## v1.x → v2.0.0 마이그레이션
 
-v1 봇이 돌고 있던 머신에서 처음 v2를 띄울 때:
-
-```bash
-cp data/state.json data/state.json.v1-backup
-cp docs/calendar/events.json /tmp/events-pre-v2.json   # (있다면)
-
-.venv/bin/python scripts/migrate_to_v2.py --dry-run    # 변환 카운트 확인
-.venv/bin/python scripts/migrate_to_v2.py              # 적용
-
-launchctl kickstart -k gui/$(id -u)/com.user.cse-bot   # 첫 사이클 실행
-sleep 30
-tail -50 logs/launchd.stderr.log                       # 'calendar.cache_update' 라인 확인
-
-diff <(jq -S . /tmp/events-pre-v2.json) \
-     <(jq -S . docs/calendar/events.json)              # v1 superset 검증
-```
-
-첫 v2 사이클은 migrated 글을 한 번 재요약 (~$0.01). 다음 사이클부터 warm cache로 일일 Gemini 호출 < 10회.
+v1 봇이 돌던 머신에서 처음 v2를 띄울 때만 1회 필요. 절차는 [`docs/MIGRATION_v2.md`](docs/MIGRATION_v2.md) 참고. v2로 새로 설치한 머신은 이 단계 무시.
 
 ## 설정
 
