@@ -95,22 +95,107 @@ class TestGitPublish:
             # git diff --quiet returns 1 if changes exist
             if "diff" in args and "--quiet" in args:
                 return subprocess.CompletedProcess(args=args, returncode=1)
+            if "rev-parse" in args:
+                return subprocess.CompletedProcess(
+                    args=args, returncode=0, stdout="abc123\n",
+                )
             return subprocess.CompletedProcess(args=args, returncode=0)
 
         with patch("cse_bot.web_publisher.subprocess.run", side_effect=fake_run) as run:
             published = git_publish([tmp_path], message="auto: test", cwd=tmp_path)
 
         assert published is True
-        # add, commit, push expected in sequence
+        # add, commit, pull --rebase, push expected in sequence
         seen = [c.args[0] for c in run.call_args_list]
         assert any("add" in a for a in seen)
         assert any("commit" in a for a in seen)
+        assert any("pull" in a and "--rebase" in a for a in seen)
         assert any("push" in a for a in seen)
+
+    def test_pull_runs_before_push(self, tmp_path: Path) -> None:
+        """Push must follow a successful rebase onto upstream."""
+        def fake_run(args: list[str], **kw: object) -> subprocess.CompletedProcess[str]:
+            if "diff" in args and "--quiet" in args:
+                return subprocess.CompletedProcess(args=args, returncode=1)
+            if "rev-parse" in args:
+                return subprocess.CompletedProcess(
+                    args=args, returncode=0, stdout="abc123\n",
+                )
+            return subprocess.CompletedProcess(args=args, returncode=0)
+
+        with patch("cse_bot.web_publisher.subprocess.run", side_effect=fake_run) as run:
+            git_publish([tmp_path], message="x", cwd=tmp_path)
+
+        seen = [c.args[0] for c in run.call_args_list]
+        pull_idx = next(i for i, a in enumerate(seen) if "pull" in a)
+        push_idx = next(i for i, a in enumerate(seen) if "push" in a)
+        assert pull_idx < push_idx
+
+    def test_rolls_back_commit_when_push_fails(self, tmp_path: Path) -> None:
+        """If push fails, the just-made commit must be reset so it does not
+        accumulate on the local branch (which would diverge from origin
+        forever after the first conflict)."""
+        def fake_run(args: list[str], **kw: object) -> subprocess.CompletedProcess[str]:
+            if "diff" in args and "--quiet" in args:
+                return subprocess.CompletedProcess(args=args, returncode=1)
+            if "rev-parse" in args:
+                return subprocess.CompletedProcess(
+                    args=args, returncode=0, stdout="pre-sha\n",
+                )
+            if "push" in args:
+                return subprocess.CompletedProcess(
+                    args=args, returncode=1, stderr="fetch first",
+                )
+            return subprocess.CompletedProcess(args=args, returncode=0)
+
+        with (
+            patch("cse_bot.web_publisher.subprocess.run", side_effect=fake_run) as run,
+            pytest.raises(RuntimeError, match="push"),
+        ):
+            git_publish([tmp_path], message="x", cwd=tmp_path)
+
+        # The rollback step must invoke `git reset --mixed <pre-sha>`.
+        reset_calls = [
+            c.args[0] for c in run.call_args_list
+            if "reset" in c.args[0] and "pre-sha" in c.args[0]
+        ]
+        assert reset_calls, "expected reset --mixed to be invoked on push failure"
+
+    def test_rolls_back_commit_when_pull_rebase_fails(self, tmp_path: Path) -> None:
+        def fake_run(args: list[str], **kw: object) -> subprocess.CompletedProcess[str]:
+            if "diff" in args and "--quiet" in args:
+                return subprocess.CompletedProcess(args=args, returncode=1)
+            if "rev-parse" in args:
+                return subprocess.CompletedProcess(
+                    args=args, returncode=0, stdout="pre-sha\n",
+                )
+            if "pull" in args:
+                return subprocess.CompletedProcess(
+                    args=args, returncode=1, stderr="rebase conflict",
+                )
+            return subprocess.CompletedProcess(args=args, returncode=0)
+
+        with (
+            patch("cse_bot.web_publisher.subprocess.run", side_effect=fake_run) as run,
+            pytest.raises(RuntimeError, match="rebase"),
+        ):
+            git_publish([tmp_path], message="x", cwd=tmp_path)
+
+        cmds = [c.args[0] for c in run.call_args_list]
+        # Aborts any in-progress rebase, then resets.
+        assert any("rebase" in a and "--abort" in a for a in cmds)
+        assert any("reset" in a and "pre-sha" in a for a in cmds)
+        # Push must NOT have been attempted after the failed rebase.
+        assert not any("push" in a for a in cmds)
 
     def test_propagates_commit_failure_as_false(self, tmp_path: Path) -> None:
         def fake_run(args: list[str], **kw: object) -> subprocess.CompletedProcess[str]:
             if "diff" in args:
                 return subprocess.CompletedProcess(args=args, returncode=1)
+            if "rev-parse" in args:
+                return subprocess.CompletedProcess(
+                    args=args, returncode=0, stdout="pre-sha\n",
+                )
             if "commit" in args:
                 return subprocess.CompletedProcess(args=args, returncode=1, stderr="x")
             return subprocess.CompletedProcess(args=args, returncode=0)
