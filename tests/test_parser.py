@@ -70,3 +70,35 @@ def test_extract_post_id_rejects_zero_in_query_string() -> None:
 def test_extract_post_id_accepts_positive() -> None:
     got = extract_post_id("https://cse.pusan.ac.kr/bbs/cse/2055/1389652/artclView.do")
     assert got == 1389652
+
+
+def test_parse_strips_new_badge_from_title() -> None:
+    """The `<span class="new">새글</span>` badge must not leak into the title.
+
+    Real-site sample: the badge sits inside the title link, between the
+    actual title text and the closing `</a>`. Without removal, the badge
+    text gets joined onto the title and the trailing punctuation (e.g.
+    `(~5.29.)` ) loses its closing characters.
+    """
+    html = """
+    <table class="board-table">
+      <tbody>
+        <tr>
+          <td class="td-num">123</td>
+          <td class="td-title">
+            <a href="/bbs/cse/2055/1441379/artclView.do">
+              [장학] 국가근로장학금 신청 안내(~5.29.)
+              <span class="new">새글</span>
+            </a>
+          </td>
+          <td class="td-write">정예랑</td>
+          <td class="td-date">2026.05.22</td>
+          <td class="td-file"></td>
+        </tr>
+      </tbody>
+    </table>
+    """
+    posts = parse(html)
+    assert len(posts) == 1
+    assert posts[0].title == "[장학] 국가근로장학금 신청 안내(~5.29.)"
+    assert "새글" not in posts[0].title

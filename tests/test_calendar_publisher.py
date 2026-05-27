@@ -150,6 +150,46 @@ def test_update_cache_hit_skips_summarize() -> None:
     assert cache.boards["14221"]["100"].last_seen == "2026-05-26T23:00:00+09:00"
 
 
+def test_update_cache_hit_self_heals_title_when_changed() -> None:
+    """Warm cache: body unchanged but list-page title changed (e.g. `새글`
+    badge fell off) — the cached title must be refreshed so the calendar
+    stops showing the stale variant. Other fields stay intact.
+    """
+    from cse_bot.post_cache import content_hash
+    body = "stable body"
+    cache = PostCache()
+    cache.boards["14221"] = {
+        "100": PostCacheEntry(
+            title="[장학] 안내(~5.29 새글", url="https://x/100",
+            content_hash=content_hash(body),
+            summarized_at="2026-05-01T00:00:00+09:00",
+            deadline="2026-05-29", category="장학/등록",
+            summary="cached", important=False,
+            last_seen="2026-05-01T00:00:00+09:00",
+        )
+    }
+
+    def fake_fetch(url: str) -> ArticleContent | None:
+        return ArticleContent(body=body, image_urls=[])
+
+    def fake_summarize(body: str, image_urls: list[str]) -> SummaryResult | None:
+        raise AssertionError("summarize should not be called on cache hit")
+
+    fresh_title = "[장학] 안내(~5.29.)"
+    update_cache_from_snapshot(
+        cache, "14221",
+        [Post(id=100, title=fresh_title, author="", date="",
+              url="https://x/100", category="", has_attachment=False)],
+        now_iso="2026-05-26T23:00:00+09:00",
+        fetch_body=fake_fetch,
+        summarize_fn=fake_summarize,
+    )
+    entry = cache.boards["14221"]["100"]
+    assert entry.title == fresh_title
+    assert entry.deadline == "2026-05-29"  # untouched
+    assert entry.summary == "cached"       # untouched
+
+
 def test_update_cache_changed_body_triggers_resummarize() -> None:
     from cse_bot.post_cache import content_hash
     cache = PostCache()

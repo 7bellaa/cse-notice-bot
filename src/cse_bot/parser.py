@@ -73,6 +73,11 @@ def _row_to_post(row: Tag) -> Post | None:
         return None
 
     full_url = urljoin(BASE_URL, href)
+    # Drop status badges (`<span class="new">새글</span>` etc.) so they don't
+    # get joined into the title — they're transient and leave stale text in
+    # the cache once they disappear from the list page.
+    for badge in title_link.select(".new, .blind, img[alt='새글']"):
+        badge.decompose()
     title = _clean_text(title_link.get_text(separator=" ", strip=True))
 
     author_td = row.select_one("td.td-write")

@@ -137,7 +137,13 @@ def update_cache_from_snapshot(
 
         new_hash = content_hash(content.body)
         if cached is not None and cached.content_hash == new_hash:
-            continue  # warm cache — already bumped last_seen
+            # Refresh the title even on a warm cache: the list page strips
+            # transient badges (e.g. `새글`) once a post ages out of "new",
+            # and the cached title would otherwise stay frozen with the old
+            # variant for the full TTL window.
+            if cached.title != post.title:
+                cached.title = post.title
+            continue  # last_seen already bumped above
 
         result = summarize_fn(content.body, list(content.image_urls))
         if result is None:
