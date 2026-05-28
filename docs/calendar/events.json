@@ -7,13 +7,13 @@
     "color": "#f59e0b",
     "extendedProps": {
       "category": "비교과/활동",
-      "summary": "AI융합교육원에서 오픈소스SW 라이선스 이해 특강을 5월 29일(금) 비대면으로 진행하며, 신청은 5월 28일(목) 17시까지입니다.",
+      "summary": "오픈소스SW에 관심 있는 학생들을 대상으로 오픈소스SW 라이선스 이해 특강이 5월 29일(금)에 비대면으로 진행되며, 5월 28일(목) 17시까지 신청해야 합니다.",
       "important": false
     }
   },
   {
     "id": "1441379",
-    "title": "[장학] 2026.1학기 국가근로장학금 하계방학 집중근로(교외) 신청 기간 안내(~5.29 새글",
+    "title": "[장학] 2026.1학기 국가근로장학금 하계방학 집중근로(교외) 신청 기간 안내(~5.29",
     "start": "2026-05-29",
     "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1441379/artclView.do",
     "color": "#8b5cf6",
@@ -21,6 +21,18 @@
       "category": "장학/등록",
       "summary": "2026학년도 1학기 국가근로장학 신청 학생은 하계방학 집중근로(교외)를 5월 29일까지 한국장학재단 홈페이지/앱에서 신청하세요.",
       "important": false
+    }
+  },
+  {
+    "id": "0",
+    "title": "[AI융합교육원] 2026 PNU AI Booster 2기 모집",
+    "start": "2026-05-31",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1441440/artclView.do",
+    "color": "#f59e0b",
+    "extendedProps": {
+      "category": "비교과/활동",
+      "summary": "",
+      "important": true
     }
   },
   {
@@ -37,25 +49,37 @@
   },
   {
     "id": "1441723",
-    "title": "[AI융합교육원] 2026 전국 대학생 AI 자율주행 경진대회 참가팀 모집 새글",
+    "title": "[AI융합교육원] 2026 전국 대학생 AI 자율주행 경진대회 참가팀 모집",
     "start": "2026-06-07",
     "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1441723/artclView.do",
     "color": "#f59e0b",
     "extendedProps": {
       "category": "비교과/활동",
-      "summary": "부산대학교 AI융합교육원에서 2026 전국 대학생 AI 자율주행 경진대회에 참가할 대표팀을 2026년 6월 7일까지 모집합니다.",
+      "summary": "부산대학교 AI융합교육원에서 2026 전국 대학생 AI 자율주행 경진대회 참가팀을 6월 7일까지 모집합니다.",
       "important": true
     }
   },
   {
     "id": "1441380",
-    "title": "[장학] 2026.2학기 주거안정장학금 신청 안내(~6.22.) 새글",
+    "title": "[장학] 2026.2학기 주거안정장학금 신청 안내(~6.22.)",
     "start": "2026-06-22",
     "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1441380/artclView.do",
     "color": "#8b5cf6",
     "extendedProps": {
       "category": "장학/등록",
       "summary": "2026학년도 2학기 주거안정장학금 신청이 2026년 6월 22일(월) 18시까지 한국장학재단 누리집 또는 모바일 앱을 통해 진행됩니다. 대상은 기초/차상위 계층 중 원거리 통학 대학생입니다.",
+      "important": true
+    }
+  },
+  {
+    "id": "1441111",
+    "title": "[장학] 2026-2학기 국가장학금 1차 신청 안내(~6/22)",
+    "start": "2026-06-22",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1441111/artclView.do",
+    "color": "#8b5cf6",
+    "extendedProps": {
+      "category": "장학/등록",
+      "summary": "2026년 2학기 국가장학금 1차 신청은 5/22~6/22까지 한국장학재단 누리집/앱에서, 서류 및 가구원 동의는 6/29까지입니다.",
       "important": true
     }
   },
