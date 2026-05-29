@@ -426,7 +426,30 @@ def _fetch_posts_until_cutoff(
             break
         if min(p.id for p in page_posts) <= watermark:
             break
-    return posts
+    return _dedup_by_id(posts)
+
+
+def _dedup_by_id(posts: list[Post]) -> list[Post]:
+    """Drop duplicate post ids, keeping the first occurrence.
+
+    The same article can appear twice in the listing: a freshly posted notice
+    shows up both as a pinned ('일반공지') row at the top of the page and as its
+    own regular numbered row, and a post on a page boundary can recur across
+    pages. Only the listing ``category`` differs between copies, and no consumer
+    reads ``Post.category`` (the notifier and calendar derive it from the title),
+    so keeping the first occurrence is safe. Without this, ``differ.diff`` and
+    the digest would surface the post twice.
+    """
+    seen: set[int] = set()
+    unique: list[Post] = []
+    for post in posts:
+        if post.id in seen:
+            continue
+        seen.add(post.id)
+        unique.append(post)
+    if len(unique) != len(posts):
+        log.info("posts.deduped raw=%d unique=%d", len(posts), len(unique))
+    return unique
 
 
 def _with_page(url: str, page: int) -> str:

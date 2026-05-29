@@ -15,23 +15,41 @@ WEBHOOK = "https://discord.com/api/webhooks/x/y"
 ALERT = "https://discord.com/api/webhooks/a/alert"
 
 
-def _html_with_posts(ids: list[int]) -> str:
-    """Build board HTML matching the parser's selectors (table.board-table, td.td-title a)."""
-    rows = "".join(
-        f"""
+def _row(post_id: int, num_label: str) -> str:
+    href = f"https://cse.pusan.ac.kr/cse/14221/artclView.do?articleNo={post_id}"
+    return f"""
         <tr>
-            <td class="td-num">일반공지</td>
+            <td class="td-num">{num_label}</td>
             <td class="td-title">
-                <a href="https://cse.pusan.ac.kr/cse/14221/artclView.do?articleNo={i}">제목 {i}</a>
+                <a href="{href}">제목 {post_id}</a>
             </td>
             <td class="td-write">작성자</td>
             <td class="td-date">2026.04.30</td>
             <td class="td-file"></td>
         </tr>
         """
-        for i in ids
-    )
+
+
+def _html_with_posts(ids: list[int]) -> str:
+    """Build board HTML matching the parser's selectors (table.board-table, td.td-title a)."""
+    rows = "".join(_row(i, "일반공지") for i in ids)
     return f"<html><body><table class='board-table'><tbody>{rows}</tbody></table></body></html>"
+
+
+def _html_pinned_and_regular(pinned_ids: list[int], regular_ids: list[int]) -> str:
+    """Board HTML where pinned ('일반공지') rows sit above regular numbered rows.
+
+    Mirrors the live PNU CSE board: a freshly posted notice can appear BOTH as a
+    pinned row at the top and as its own regular numbered row, so the same
+    post id shows up twice on one page.
+    """
+    pinned = "".join(_row(i, "일반공지") for i in pinned_ids)
+    regular = "".join(_row(i, str(seq)) for seq, i in enumerate(regular_ids, start=1))
+    return (
+        "<html><body><table class='board-table'><tbody>"
+        f"{pinned}{regular}"
+        "</tbody></table></body></html>"
+    )
 
 
 @pytest.fixture
@@ -128,6 +146,57 @@ def test_new_posts_are_notified_in_ascending_order(
 
     final = json.loads(state_path.read_text(encoding="utf-8"))
     assert final["boards"]["14221"]["last_max_post_id"] == 19237
+
+
+@respx.mock
+def test_post_pinned_and_regular_is_notified_once(
+    cfg_file: Path, tmp_path: Path
+) -> None:
+    """A new post that is also pinned shows twice in the listing — once as a
+    '일반공지' row at the top, once as a regular numbered row. It must be
+    notified exactly once.
+
+    Regression for the 1441906 duplicate: post 1441906 was newly posted AND
+    pinned, so it appeared in both the pinned and regular sections of page 1.
+    """
+    state_path = tmp_path / "state.json"
+    state_path.write_text(
+        json.dumps(
+            {
+                "boards": {
+                    "14221": {
+                        "last_max_post_id": 19234,
+                        "last_checked": "2026-04-30T09:00:00+09:00",
+                        "empty_streak": 0,
+                    }
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    # id 19236 is pinned at the top AND present as a regular numbered row.
+    respx.get(BOARD_URL).mock(
+        return_value=httpx.Response(
+            200,
+            text=_html_pinned_and_regular(
+                pinned_ids=[19236],
+                regular_ids=[19237, 19236, 19235, 19234, 19233],
+            ),
+        )
+    )
+    respx.get(host="cse.pusan.ac.kr", path__startswith="/cse/14221/artclView.do").mock(
+        return_value=httpx.Response(404)
+    )
+    notify_route = respx.post(WEBHOOK).mock(return_value=httpx.Response(204))
+
+    exit_code = run_cycle(cfg_file)
+    assert exit_code == 0
+
+    # New posts above watermark 19234 are 19235, 19236, 19237 — three, not four.
+    assert notify_route.call_count == 3
+    bodies = "\n".join(c.request.content.decode() for c in notify_route.calls)
+    assert bodies.count("제목 19236") == 1
 
 
 @respx.mock
