@@ -23,12 +23,11 @@ import hashlib
 import json
 import logging
 import re
-import shutil
-import time
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from pathlib import Path
 
+from cse_bot._io import atomic_write_text, quarantine_corrupt
 from cse_bot.models import PostCacheEntry
 
 log = logging.getLogger(__name__)
@@ -47,8 +46,7 @@ def load_post_cache(path: Path) -> PostCache:
     try:
         raw = json.loads(path.read_text(encoding="utf-8"))
     except json.JSONDecodeError:
-        backup = path.with_name(f"{path.name}.corrupt-{int(time.time())}")
-        shutil.move(str(path), backup)
+        backup = quarantine_corrupt(path)
         log.warning("post_cache.corrupt path=%s backup=%s", path, backup)
         return PostCache()
 
@@ -83,7 +81,6 @@ def load_post_cache(path: Path) -> PostCache:
 
 
 def save_post_cache(path: Path, cache: PostCache) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
     payload = {
         "schema_version": cache.schema_version,
         "updated_at": cache.updated_at,
@@ -107,9 +104,7 @@ def save_post_cache(path: Path, cache: PostCache) -> None:
             for board_id, posts in cache.boards.items()
         },
     }
-    tmp = path.with_suffix(path.suffix + ".tmp")
-    tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
-    tmp.replace(path)
+    atomic_write_text(path, json.dumps(payload, ensure_ascii=False, indent=2))
 
 
 _WHITESPACE_RE = re.compile(r"\s+")

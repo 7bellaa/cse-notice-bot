@@ -357,7 +357,6 @@ def send_daily_digest(
     site_url: str,
     new_posts: list[Post],
     upcoming: list[TrackedDeadline],
-    summaries: dict[int, str],  # currently unused; reserved for future expansion
     today: date,
     timeout: float,
     retries: int,
@@ -369,8 +368,6 @@ def send_daily_digest(
     ``(success_count, failed_urls)``. Per-webhook independent — one failure
     does not abort the others.
     """
-    del summaries  # not used yet; deadlines already cover the calendar story
-
     embed: dict[str, object] = {
         "title": f"📅 PNU CSE 마감일 캘린더 · {today.isoformat()}",
         "url": site_url,

@@ -11,7 +11,6 @@ from cse_bot.category import (
     CATEGORY_SCHOLARSHIP,
     CLASSIFICATION_PALETTE,
     DEFAULT_COLOR,
-    category_to_color,
     classification_to_color,
     classify,
     extract_category,
@@ -160,20 +159,3 @@ class TestClassificationToColor:
             CATEGORY_ACTIVITY, CATEGORY_GENERAL,
         ):
             assert cat in CLASSIFICATION_PALETTE
-
-
-class TestCategoryToColorBackwardCompat:
-    """Legacy ``category_to_color`` accepts either canonical or raw prefix."""
-
-    def test_accepts_canonical_name(self) -> None:
-        assert category_to_color(CATEGORY_SCHOLARSHIP) == (139, 92, 246)
-
-    def test_accepts_raw_prefix(self) -> None:
-        # Raw "장학" → maps to 장학/등록 → purple
-        assert category_to_color("장학") == (139, 92, 246)
-        # "AI융합교육원" → 비교과/활동 → amber
-        assert category_to_color("AI융합교육원") == (245, 158, 11)
-
-    def test_unknown_returns_default(self) -> None:
-        assert category_to_color("") == DEFAULT_COLOR
-        assert category_to_color("nonexistent") == DEFAULT_COLOR

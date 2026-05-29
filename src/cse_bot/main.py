@@ -299,10 +299,8 @@ def _emit_daily_digest(
         _safe_alert(cfg, f"calendar git_publish failed: {e}")
 
     all_new_posts: list[Post] = []
-    all_summaries: dict[int, str] = {}
-    for _board, _posts, new_posts, summaries in per_board_full:
+    for _board, _posts, new_posts, _summaries in per_board_full:
         all_new_posts.extend(new_posts)
-        all_summaries.update(summaries)
 
     webhook_urls = cfg.all_webhook_urls()
     if not webhook_urls:
@@ -316,7 +314,6 @@ def _emit_daily_digest(
         site_url=cfg.calendar.site_url,
         new_posts=all_new_posts,
         upcoming=upcoming,
-        summaries=all_summaries,
         today=today,
         timeout=cfg.general.http_timeout_seconds,
         retries=cfg.general.http_retries,

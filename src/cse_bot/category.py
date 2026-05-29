@@ -184,20 +184,3 @@ def is_important(title: str) -> bool:
 def classification_to_color(category: str) -> tuple[int, int, int]:
     """Look up the RGB color for one of the five canonical categories."""
     return CLASSIFICATION_PALETTE.get(category, DEFAULT_COLOR)
-
-
-# Backward-compat alias used by older callers that still pass a raw prefix.
-# It now resolves the prefix to a canonical category first.
-def category_to_color(category_or_prefix: str) -> tuple[int, int, int]:
-    """Resolve *category_or_prefix* to a color.
-
-    Accepts either a canonical category name (``"장학/등록"``) **or** a raw
-    prefix (``"장학"``, ``"AI융합교육원"``). Anything unknown falls back to
-    :data:`DEFAULT_COLOR`.
-    """
-    if category_or_prefix in CLASSIFICATION_PALETTE:
-        return CLASSIFICATION_PALETTE[category_or_prefix]
-    canonical = _PREFIX_TO_CATEGORY.get(category_or_prefix)
-    if canonical:
-        return CLASSIFICATION_PALETTE[canonical]
-    return DEFAULT_COLOR

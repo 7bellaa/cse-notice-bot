@@ -18,6 +18,7 @@ import subprocess
 from collections.abc import Iterable
 from pathlib import Path
 
+from cse_bot._io import atomic_write_text
 from cse_bot.category import classification_to_color
 from cse_bot.models import TrackedDeadline
 
@@ -52,13 +53,7 @@ def write_events_json(deadlines: Iterable[TrackedDeadline], output_path: Path) -
             }
         )
 
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = output_path.with_suffix(output_path.suffix + ".tmp")
-    tmp.write_text(
-        json.dumps(events, ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
-    tmp.replace(output_path)
+    atomic_write_text(output_path, json.dumps(events, ensure_ascii=False, indent=2))
 
 
 def git_publish(

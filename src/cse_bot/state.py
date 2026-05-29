@@ -16,10 +16,9 @@ from __future__ import annotations
 
 import json
 import logging
-import shutil
-import time
 from pathlib import Path
 
+from cse_bot._io import atomic_write_text, quarantine_corrupt
 from cse_bot.models import BoardState, TrackedDeadline
 
 log = logging.getLogger(__name__)
@@ -38,8 +37,7 @@ def load_state(path: Path) -> BoardStateMap:
     try:
         raw = json.loads(path.read_text(encoding="utf-8"))
     except json.JSONDecodeError:
-        backup = path.with_name(f"{path.name}.corrupt-{int(time.time())}")
-        shutil.move(str(path), backup)
+        backup = quarantine_corrupt(path)
         log.warning("state.corrupt path=%s backup=%s", path, backup)
         return {}
 
@@ -88,7 +86,6 @@ def save_state(path: Path, state: BoardStateMap) -> None:
                     f"old={old.last_max_post_id} new={new.last_max_post_id}"
                 )
 
-    path.parent.mkdir(parents=True, exist_ok=True)
     payload = {
         "boards": {
             board_id: {
@@ -112,6 +109,4 @@ def save_state(path: Path, state: BoardStateMap) -> None:
             for board_id, s in state.items()
         }
     }
-    tmp = path.with_suffix(path.suffix + ".tmp")
-    tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
-    tmp.replace(path)
+    atomic_write_text(path, json.dumps(payload, ensure_ascii=False, indent=2))
