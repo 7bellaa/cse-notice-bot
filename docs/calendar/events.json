@@ -1,17 +1,5 @@
 [
   {
-    "id": "1440913",
-    "title": "[AI융합교육원] 오픈소스SW특강 참가자 모집 안내",
-    "start": "2026-05-28",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1440913/artclView.do",
-    "color": "#f59e0b",
-    "extendedProps": {
-      "category": "비교과/활동",
-      "summary": "오픈소스SW에 관심 있는 학생들을 대상으로 오픈소스SW 라이선스 이해 특강이 5월 29일(금)에 비대면으로 진행되며, 5월 28일(목) 17시까지 신청해야 합니다.",
-      "important": false
-    }
-  },
-  {
     "id": "1441379",
     "title": "[장학] 2026.1학기 국가근로장학금 하계방학 집중근로(교외) 신청 기간 안내(~5.29",
     "start": "2026-05-29",
@@ -20,6 +8,18 @@
     "extendedProps": {
       "category": "장학/등록",
       "summary": "2026학년도 1학기 국가근로장학 신청 학생은 하계방학 집중근로(교외)를 5월 29일까지 한국장학재단 홈페이지/앱에서 신청하세요.",
+      "important": false
+    }
+  },
+  {
+    "id": "1441817",
+    "title": "[언어교육원] 2026년 CLS 프로그램 언어파트너(Language Partner) 2차",
+    "start": "2026-05-31",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1441817/artclView.do",
+    "color": "#6b7280",
+    "extendedProps": {
+      "category": "일반공지",
+      "summary": "부산대학교 학부 및 대학원 재적생(남성 6명)은 2026년 CLS 한국어교육 프로그램 언어파트너에 2026년 5월 31일까지 이메일로 지원하세요.",
       "important": false
     }
   },
@@ -60,6 +60,18 @@
     }
   },
   {
+    "id": "1441818",
+    "title": "[교수학습지원센터] 2026 Re-Start 프로그램 신청자 모집 안내(~6/8)",
+    "start": "2026-06-08",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1441818/artclView.do",
+    "color": "#f59e0b",
+    "extendedProps": {
+      "category": "비교과/활동",
+      "summary": "부산대 학부 재학생을 대상으로 Re-Start 프로그램 러너/러닝코치를 6월 8일까지 모집합니다. 이수 시 장학금과 시상금이 지급됩니다.",
+      "important": false
+    }
+  },
+  {
     "id": "1441380",
     "title": "[장학] 2026.2학기 주거안정장학금 신청 안내(~6.22.)",
     "start": "2026-06-22",
@@ -81,6 +93,30 @@
       "category": "장학/등록",
       "summary": "2026년 2학기 국가장학금 1차 신청은 5/22~6/22까지 한국장학재단 누리집/앱에서, 서류 및 가구원 동의는 6/29까지입니다.",
       "important": true
+    }
+  },
+  {
+    "id": "1441819",
+    "title": "[장학] 2026.2학기 국가근로장학금 1차 신청 안내(~6/22)",
+    "start": "2026-06-22",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1441819/artclView.do",
+    "color": "#8b5cf6",
+    "extendedProps": {
+      "category": "장학/등록",
+      "summary": "학생들은 2026학년도 2학기 국가근로장학금 1차 신청을 2026년 6월 22일 18시까지 한국장학재단에서 완료해야 합니다.",
+      "important": false
+    }
+  },
+  {
+    "id": "1441906",
+    "title": "[모집] 2026 여름계절 기업체험형 단기인턴십 참여학 모집(부산대학교병원 의학통계부)",
+    "start": "2026-06-28",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1441906/artclView.do",
+    "color": "#f59e0b",
+    "extendedProps": {
+      "category": "비교과/활동",
+      "summary": "부산대학교병원 의학통계부의 2026 여름계절 단기인턴십 참여자를 정보컴퓨터공학부, 의생명융합공학부 3~4학년 대상으로 6월 28일까지 모집하며, 실습지원비와 마일스톤을 지급합니다.",
+      "important": false
     }
   },
   {
