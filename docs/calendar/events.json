@@ -1,17 +1,5 @@
 [
   {
-    "id": "1441817",
-    "title": "[언어교육원] 2026년 CLS 프로그램 언어파트너(Language Partner) 2차",
-    "start": "2026-05-31",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1441817/artclView.do",
-    "color": "#6b7280",
-    "extendedProps": {
-      "category": "일반공지",
-      "summary": "부산대학교 학부 및 대학원 재적생(남성 6명)은 2026년 CLS 한국어교육 프로그램 언어파트너에 2026년 5월 31일까지 이메일로 지원하세요.",
-      "important": false
-    }
-  },
-  {
     "id": "0",
     "title": "[AI융합교육원] 2026 PNU AI Booster 2기 모집",
     "start": "2026-05-31",
@@ -32,6 +20,18 @@
     "extendedProps": {
       "category": "일반공지",
       "summary": "부산대학교 컴퓨터공학과에서 2026학년도 2학기 재입학 신청을 받습니다. 학부생 및 외국인 대학원생은 2026년 6월 5일까지, 일반 대학원생은 7월 31일까지 학과사무실로 서류를 제출해야 합니다.",
+      "important": false
+    }
+  },
+  {
+    "id": "1442011",
+    "title": "[모집]여름계절학기 현장실습학기제_ 소만사 참여학생 모집",
+    "start": "2026-06-05",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1442011/artclView.do",
+    "color": "#f59e0b",
+    "extendedProps": {
+      "category": "비교과/활동",
+      "summary": "부산대학교 정보컴퓨터공학부 3~4학년 대상 소만사 현장실습 프로그램 신청이 6월 5일 12시까지 구글폼으로 진행됩니다.",
       "important": false
     }
   },
