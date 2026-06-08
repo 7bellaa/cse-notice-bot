@@ -12,30 +12,6 @@
     }
   },
   {
-    "id": "1441723",
-    "title": "[AI융합교육원] 2026 전국 대학생 AI 자율주행 경진대회 참가팀 모집",
-    "start": "2026-06-07",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1441723/artclView.do",
-    "color": "#f59e0b",
-    "extendedProps": {
-      "category": "비교과/활동",
-      "summary": "부산대학교 AI융합교육원에서 2026 전국 대학생 AI 자율주행 경진대회 참가팀을 6월 7일까지 모집합니다.",
-      "important": true
-    }
-  },
-  {
-    "id": "1442422",
-    "title": "[언어교육원] 2026 CLS 프로그램 룸메이트 2차 선발 안내(~6/7)",
-    "start": "2026-06-07",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1442422/artclView.do",
-    "color": "#f59e0b",
-    "extendedProps": {
-      "category": "비교과/활동",
-      "summary": "부산대 재적 남학생을 대상으로 2026년 CLS 한국어교육 프로그램 룸메이트를 2차 선발하며, 2026년 6월 7일 18:00까지 이메일로 접수합니다.",
-      "important": false
-    }
-  },
-  {
     "id": "1441818",
     "title": "[교수학습지원센터] 2026 Re-Start 프로그램 신청자 모집 안내(~6/8)",
     "start": "2026-06-08",
@@ -68,6 +44,30 @@
     "extendedProps": {
       "category": "일반공지",
       "summary": "2026학년도 1학기 출석인정 온라인 신청 마감은 2026년 6월 10일 13:00까지이며, 이후에는 수기 신청해야 합니다.",
+      "important": false
+    }
+  },
+  {
+    "id": "1442011",
+    "title": "[모집]여름계절학기 현장실습학기제_ 소만사 참여학생 모집",
+    "start": "2026-06-11",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1442011/artclView.do",
+    "color": "#f59e0b",
+    "extendedProps": {
+      "category": "비교과/활동",
+      "summary": "부산대학교 정보컴퓨터공학부 3~4학년 학생 1명을 대상으로 소만사 현장실습 프로그램 참가자를 2026년 6월 11일(목) 12:00까지 구글폼으로 모집합니다.",
+      "important": false
+    }
+  },
+  {
+    "id": "1442865",
+    "title": "[AI융합교육원] 제7회 PNU Coding Challenge (PCC)장학금 신청안내",
+    "start": "2026-06-12",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1442865/artclView.do",
+    "color": "#f59e0b",
+    "extendedProps": {
+      "category": "비교과/활동",
+      "summary": "부산대 컴퓨터공학과 7회 PCC 장학금 신청은 2026년 6월 12일(금) 23:59까지 구글폼 제출. 점수별 차등 지급, 누적 50만원 상한.",
       "important": false
     }
   },
