@@ -12,30 +12,6 @@
     }
   },
   {
-    "id": "1442424",
-    "title": "[국립대학육성사업] 2026 하계 예술 분야 전공역량 강화를 위한 부산대와 함께하는 너의",
-    "start": "2026-06-10",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1442424/artclView.do",
-    "color": "#f59e0b",
-    "extendedProps": {
-      "category": "비교과/활동",
-      "summary": "부산대 재학생은 2026학년도 하계 '너의 재능이 보여' 예술 분야 전공 봉사 파견팀 추가 모집에 2026년 6월 10일 14시까지 신청할 수 있습니다.",
-      "important": false
-    }
-  },
-  {
-    "id": "1442490",
-    "title": "2026학년도 1학기 출석인정 신청 기한 안내",
-    "start": "2026-06-10",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1442490/artclView.do",
-    "color": "#6b7280",
-    "extendedProps": {
-      "category": "일반공지",
-      "summary": "2026학년도 1학기 출석인정 온라인 신청 마감은 2026년 6월 10일 13:00까지이며, 이후에는 수기 신청해야 합니다.",
-      "important": false
-    }
-  },
-  {
     "id": "1442011",
     "title": "[모집]여름계절학기 현장실습학기제_ 소만사 참여학생 모집",
     "start": "2026-06-11",
@@ -48,6 +24,18 @@
     }
   },
   {
+    "id": "1442881",
+    "title": "[모집]여름계절학기 현장실습학기제_ 소만사 참여학생 모집 연장(~6.11)",
+    "start": "2026-06-11",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1442881/artclView.do",
+    "color": "#f59e0b",
+    "extendedProps": {
+      "category": "비교과/활동",
+      "summary": "정보컴퓨터공학부 3~4학년을 대상으로 소만사 현장실습생을 1명 모집하며, 6월 11일 12시까지 구글폼으로 신청 바랍니다.",
+      "important": false
+    }
+  },
+  {
     "id": "1442865",
     "title": "[AI융합교육원] 제7회 PNU Coding Challenge (PCC)장학금 신청안내",
     "start": "2026-06-12",
@@ -56,6 +44,30 @@
     "extendedProps": {
       "category": "비교과/활동",
       "summary": "부산대 컴퓨터공학과 7회 PCC 장학금 신청은 2026년 6월 12일(금) 23:59까지 구글폼 제출. 점수별 차등 지급, 누적 50만원 상한.",
+      "important": false
+    }
+  },
+  {
+    "id": "1443034",
+    "title": "[장학] 2026년 파란사다리 사업 참가신청서(추가모집)",
+    "start": "2026-06-12",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1443034/artclView.do",
+    "color": "#8b5cf6",
+    "extendedProps": {
+      "category": "장학/등록",
+      "summary": "경제적·사회적 취약계층 학생을 위한 2026 파란사다리 사업 추가 모집이 진행되며, 지원서 접수 마감은 2026년 6월 12일(금) 15시입니다.",
+      "important": false
+    }
+  },
+  {
+    "id": "1442993",
+    "title": "[인공지능전공]경북대학교 공동학위를 위한 2026학년도 2학기 학점교류 신청 안내",
+    "start": "2026-06-19",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1442993/artclView.do",
+    "color": "#6b7280",
+    "extendedProps": {
+      "category": "일반공지",
+      "summary": "부산대 인공지능전공 2학년 이상 학생은 2026학년도 2학기 경북대 공동학위 교류를 2026년 6월 19일까지 신청하세요.",
       "important": false
     }
   },
@@ -96,6 +108,30 @@
     }
   },
   {
+    "id": "1443095",
+    "title": "[모집] 2026 여름계절 기업문제해결형 단기인턴십 참여학생 모집(투핸즈인터랙티브)",
+    "start": "2026-06-22",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1443095/artclView.do",
+    "color": "#f59e0b",
+    "extendedProps": {
+      "category": "비교과/활동",
+      "summary": "AI융합교육원에서 3~4학년 재학생을 대상으로 투핸즈인터랙티브 단기인턴십 참여 학생을 2026년 6월 22일(월) 오전 9시까지 모집합니다.",
+      "important": false
+    }
+  },
+  {
+    "id": "1442941",
+    "title": "[취업전략과] 2026학년도 1차 진로부트캠프(온라인) 모집 안내(~6/24)",
+    "start": "2026-06-24",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1442941/artclView.do",
+    "color": "#ec4899",
+    "extendedProps": {
+      "category": "졸업/진로",
+      "summary": "부산대학교 1~3학년 재학생을 위한 2026학년도 1차 진로부트캠프 참가자를 2026년 6월 24일까지 선착순 모집합니다.",
+      "important": true
+    }
+  },
+  {
     "id": "1441906",
     "title": "[모집] 2026 여름계절 기업체험형 단기인턴십 참여학 모집(부산대학교병원 의학통계부)",
     "start": "2026-06-28",
@@ -104,6 +140,30 @@
     "extendedProps": {
       "category": "비교과/활동",
       "summary": "SW전공 3~4학년을 대상으로 부산대학교병원 의학통계부 단기인턴십 참여 학생을 6월 28일까지 모집하며, 실습지원비 등 혜택이 있습니다.",
+      "important": false
+    }
+  },
+  {
+    "id": "1442949",
+    "title": "[AI융합교육원] 2026년도 제5회 대학 연합 아주 소중한 딥러닝 챌린지",
+    "start": "2026-06-28",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1442949/artclView.do",
+    "color": "#f59e0b",
+    "extendedProps": {
+      "category": "비교과/활동",
+      "summary": "부산대 등 6개 SW중심대학 재학생 대상 제5회 딥러닝 챌린지 참가자를 2026년 6월 28일까지 모집하며, LLM 수학 문제 해결이 주제입니다.",
+      "important": false
+    }
+  },
+  {
+    "id": "1442986",
+    "title": "[인문사회융합인재양성사업단] Career PATH-FINDER 취.창업동아리 모집 안내",
+    "start": "2026-06-29",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1442986/artclView.do",
+    "color": "#f59e0b",
+    "extendedProps": {
+      "category": "비교과/활동",
+      "summary": "부산대 인문사회융합인재양성사업 참여학과 포함 3~5인 팀 대상 'HUSS Career PATH-FINDER' 취·창업 동아리 3차 모집이 2026년 6월 29일 마감됩니다. 구글폼과 이메일로 신청하세요.",
       "important": false
     }
   },
