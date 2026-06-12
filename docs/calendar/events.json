@@ -12,30 +12,6 @@
     }
   },
   {
-    "id": "1442011",
-    "title": "[모집]여름계절학기 현장실습학기제_ 소만사 참여학생 모집",
-    "start": "2026-06-11",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1442011/artclView.do",
-    "color": "#f59e0b",
-    "extendedProps": {
-      "category": "비교과/활동",
-      "summary": "부산대학교 정보컴퓨터공학부 3~4학년 학생 1명을 대상으로 소만사 현장실습 프로그램 참가자를 2026년 6월 11일(목) 12:00까지 구글폼으로 모집합니다.",
-      "important": false
-    }
-  },
-  {
-    "id": "1442881",
-    "title": "[모집]여름계절학기 현장실습학기제_ 소만사 참여학생 모집 연장(~6.11)",
-    "start": "2026-06-11",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1442881/artclView.do",
-    "color": "#f59e0b",
-    "extendedProps": {
-      "category": "비교과/활동",
-      "summary": "정보컴퓨터공학부 3~4학년을 대상으로 소만사 현장실습생을 1명 모집하며, 6월 11일 12시까지 구글폼으로 신청 바랍니다.",
-      "important": false
-    }
-  },
-  {
     "id": "1442865",
     "title": "[AI융합교육원] 제7회 PNU Coding Challenge (PCC)장학금 신청안내",
     "start": "2026-06-12",
@@ -164,6 +140,30 @@
     "extendedProps": {
       "category": "비교과/활동",
       "summary": "부산대 인문사회융합인재양성사업 참여학과 포함 3~5인 팀 대상 'HUSS Career PATH-FINDER' 취·창업 동아리 3차 모집이 2026년 6월 29일 마감됩니다. 구글폼과 이메일로 신청하세요.",
+      "important": false
+    }
+  },
+  {
+    "id": "1443285",
+    "title": "2026.2학기 휴.복학 신청 기간 안내",
+    "start": "2026-06-29",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1443285/artclView.do",
+    "color": "#6b7280",
+    "extendedProps": {
+      "category": "일반공지",
+      "summary": "학생들은 2026학년도 2학기 휴·복학을 1차 6월 29일, 2차 7월 31일, 3차 8월 27일까지 신청해야 하며, 전과·다중전공 희망자는 1차에 반드시 복학해야 합니다.",
+      "important": false
+    }
+  },
+  {
+    "id": "1443281",
+    "title": "[AI융합교육원] 2026 PNU AI학습공동체 참여팀 모집(~6.29 09:00까지)",
+    "start": "2026-06-29",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1443281/artclView.do",
+    "color": "#f59e0b",
+    "extendedProps": {
+      "category": "비교과/활동",
+      "summary": "부산대학교 AI학습공동체에서 7월부터 9주간 AI·SW 프로젝트를 수행할 팀을 2026년 6월 29일(월) 오전 9시까지 모집하며, 팀장에게 최대 80만원 장학금이 지급됩니다.",
       "important": false
     }
   },
