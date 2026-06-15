@@ -139,7 +139,19 @@
     "color": "#f59e0b",
     "extendedProps": {
       "category": "비교과/활동",
-      "summary": "부산대 학생들은 팀을 구성하여 AI·SW 프로젝트에 참여하고 최대 80만원의 장학금을 받을 수 있으며, 2026년 6월 29일 09:00까지 신청해야 합니다.",
+      "summary": "부산대 학생들이 AI·SW 프로젝트를 수행하는 'PNU AI학습공동체' 참가팀을 6월 29일(월) 09:00까지 모집합니다. 선정 시 최대 80만원 장학금과 멘토링이 지원됩니다.",
+      "important": false
+    }
+  },
+  {
+    "id": "1443327",
+    "title": "한국주택금융공사 현장체험 멘토링 참가자 모집(~6/30 화)",
+    "start": "2026-06-30",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1443327/artclView.do",
+    "color": "#f59e0b",
+    "extendedProps": {
+      "category": "비교과/활동",
+      "summary": "부산대 컴퓨터공학과 학생 15명을 대상으로 AI 현장체험 「A.B.C 멘토링」 참가자를 2026년 6월 30일(화)까지 구글폼으로 모집합니다.",
       "important": false
     }
   },
