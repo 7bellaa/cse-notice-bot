@@ -12,18 +12,6 @@
     }
   },
   {
-    "id": "1443821",
-    "title": "[인문사회융합인재양성사업단] 예비대학생을 위한 DX융합전공 설명회 학부생 멘토 모집 재안내",
-    "start": "2026-06-23",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1443821/artclView.do",
-    "color": "#f59e0b",
-    "extendedProps": {
-      "category": "비교과/활동",
-      "summary": "부산대학교 HUSS 사업단에서 고등학생 대상 DX 융합전공 설명회 멘토를 2026년 6월 23일(화)까지 모집합니다. 학부 재학생은 온라인 구글 폼으로 신청하세요.",
-      "important": false
-    }
-  },
-  {
     "id": "1442941",
     "title": "[취업전략과] 2026학년도 1차 진로부트캠프(온라인) 모집 안내(~6/24)",
     "start": "2026-06-24",
@@ -68,6 +56,18 @@
     "extendedProps": {
       "category": "일반공지",
       "summary": "부산대학교에서 창업에 관심 있는 부산권역 대학(원) 재학생 30명을 대상으로 AI 경영 시뮬레이션 교육을 진행하며, 2026년 6월 24일까지 온라인으로 신청받습니다.",
+      "important": false
+    }
+  },
+  {
+    "id": "1444486",
+    "title": "[대학일자리플러스센터] 하계방학 기간 NCS 특강 및 한국사능력검정시험 대비과정 신청 안내",
+    "start": "2026-06-25",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1444486/artclView.do",
+    "color": "#ec4899",
+    "extendedProps": {
+      "category": "졸업/진로",
+      "summary": "부산대 재학생 및 졸업생, 지역 청년을 대상으로 공기업 대비 NCS/한국사 1급 취업역량강화 프로그램 참여자를 2026년 6월 25일(목)까지 네이버폼으로 선착순 모집합니다.",
       "important": false
     }
   },
@@ -117,6 +117,18 @@
       "category": "비교과/활동",
       "summary": "부산대 등 6개 SW중심대학 재학생 대상 제5회 딥러닝 챌린지 참가자를 2026년 6월 28일까지 모집하며, LLM 수학 문제 해결이 주제입니다.",
       "important": false
+    }
+  },
+  {
+    "id": "1444262",
+    "title": "[모집] 부트캠프 NVIDIA 딥러닝 PBL(여름계절학기) 학부 3·4학년 TA 모집",
+    "start": "2026-06-28",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1444262/artclView.do",
+    "color": "#f59e0b",
+    "extendedProps": {
+      "category": "비교과/활동",
+      "summary": "부산대학교 컴퓨터공학과에서 2026학년도 여름계절학기 NVIDIA 딥러닝 PBL 실습조교(TA)를 3·4학년 재학생/휴학생 대상으로 2026년 6월 28일(일)까지 이메일로 모집합니다.",
+      "important": true
     }
   },
   {
