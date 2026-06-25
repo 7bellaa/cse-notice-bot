@@ -12,54 +12,6 @@
     }
   },
   {
-    "id": "1442941",
-    "title": "[취업전략과] 2026학년도 1차 진로부트캠프(온라인) 모집 안내(~6/24)",
-    "start": "2026-06-24",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1442941/artclView.do",
-    "color": "#ec4899",
-    "extendedProps": {
-      "category": "졸업/진로",
-      "summary": "부산대학교 1~3학년 재학생을 위한 2026학년도 1차 진로부트캠프 참가자를 2026년 6월 24일까지 선착순 모집합니다.",
-      "important": true
-    }
-  },
-  {
-    "id": "1443840",
-    "title": "[AI 융합교육원] 2026학년도 여름계절학기 AI 교육 교과목 청강 신청 안내 (NVI",
-    "start": "2026-06-24",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1443840/artclView.do",
-    "color": "#6b7280",
-    "extendedProps": {
-      "category": "일반공지",
-      "summary": "부산대 2~4학년을 대상으로 2026년 여름계절학기 AI 교육(NVIDIA 딥러닝 PBL, AI 스프린트) 청강생을 6월 24일까지 모집합니다.",
-      "important": false
-    }
-  },
-  {
-    "id": "1443816",
-    "title": "2026학년도 신.편입생(학부, 대학원) 학생증 추가 신청 안내",
-    "start": "2026-06-24",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1443816/artclView.do",
-    "color": "#6b7280",
-    "extendedProps": {
-      "category": "일반공지",
-      "summary": "부산대학교 내국인 학생증 추가 신청은 사전신청이 2026년 6월 24일까지, 본 신청이 6월 30일까지 하나원큐 앱에서 진행됩니다.",
-      "important": false
-    }
-  },
-  {
-    "id": "1443870",
-    "title": "[ANCHOR] 창업 AI경영 시뮬레이션 교육 신청 안내(~6/24)",
-    "start": "2026-06-24",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1443870/artclView.do",
-    "color": "#6b7280",
-    "extendedProps": {
-      "category": "일반공지",
-      "summary": "부산대학교에서 창업에 관심 있는 부산권역 대학(원) 재학생 30명을 대상으로 AI 경영 시뮬레이션 교육을 진행하며, 2026년 6월 24일까지 온라인으로 신청받습니다.",
-      "important": false
-    }
-  },
-  {
     "id": "1444486",
     "title": "[대학일자리플러스센터] 하계방학 기간 NCS 특강 및 한국사능력검정시험 대비과정 신청 안내",
     "start": "2026-06-25",
@@ -187,7 +139,7 @@
     "color": "#f59e0b",
     "extendedProps": {
       "category": "비교과/활동",
-      "summary": "정컴 장학생 선발 자격 충족을 위해 학생들은 2026년 7월 1일까지 학과활동 2회 이상 참여해야 합니다.",
+      "summary": "2026학년도 2학기 정컴 장학금 자격 충족을 위해 학과 활동 2회 이상 참여가 필요하며, 2026년 7월 1일까지의 활동이 인정됩니다.",
       "important": false
     }
   },
@@ -213,6 +165,30 @@
       "category": "졸업/진로",
       "summary": "2026년 8월 졸업 예정자는 2026년 7월 10일까지 졸업요건 서류(영어성적표, TOPCIT 등)를 학생역량지원시스템 및 학과 URL에 온라인으로 제출해야 합니다.",
       "important": true
+    }
+  },
+  {
+    "id": "1444644",
+    "title": "[AI융합교육원] 2026학년도 여름학기 AI 에이전트(AI Agent) 특강 안내",
+    "start": "2026-07-12",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1444644/artclView.do",
+    "color": "#f59e0b",
+    "extendedProps": {
+      "category": "비교과/활동",
+      "summary": "부산대학교 AI 융합교육원에서 재학생, 교직원, 기업 실무자를 대상으로 2026년 여름학기 AI 에이전트 특강 참가자를 7월 12일까지 온라인으로 모집합니다.",
+      "important": false
+    }
+  },
+  {
+    "id": "1444649",
+    "title": "2026학년도 2학기 학·석(박)사 (통합)연계과정 학생 및 전환 희망 학생 모집 안내",
+    "start": "2026-07-16",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1444649/artclView.do",
+    "color": "#f59e0b",
+    "extendedProps": {
+      "category": "비교과/활동",
+      "summary": "부산대 2026학년도 2학기 학·석(박)사(통합) 연계과정 신입생 및 전환 희망 학생 모집. 7월 16일까지 지원서를 단과대학 행정실에 제출해야 합니다.",
+      "important": false
     }
   }
 ]
