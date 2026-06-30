@@ -12,42 +12,6 @@
     }
   },
   {
-    "id": "1442986",
-    "title": "[인문사회융합인재양성사업단] Career PATH-FINDER 취.창업동아리 모집 안내",
-    "start": "2026-06-29",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1442986/artclView.do",
-    "color": "#f59e0b",
-    "extendedProps": {
-      "category": "비교과/활동",
-      "summary": "부산대 인문사회융합인재양성사업 참여학과 포함 3~5인 팀 대상 'HUSS Career PATH-FINDER' 취·창업 동아리 3차 모집이 2026년 6월 29일 마감됩니다. 구글폼과 이메일로 신청하세요.",
-      "important": false
-    }
-  },
-  {
-    "id": "1443285",
-    "title": "2026.2학기 휴.복학 신청 기간 안내",
-    "start": "2026-06-29",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1443285/artclView.do",
-    "color": "#6b7280",
-    "extendedProps": {
-      "category": "일반공지",
-      "summary": "학생들은 2026학년도 2학기 휴·복학을 1차 6월 29일, 2차 7월 31일, 3차 8월 27일까지 신청해야 하며, 전과·다중전공 희망자는 1차에 반드시 복학해야 합니다.",
-      "important": false
-    }
-  },
-  {
-    "id": "1443281",
-    "title": "[AI융합교육원] 2026 PNU AI학습공동체 참여팀 모집(~6.29 09:00까지)",
-    "start": "2026-06-29",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1443281/artclView.do",
-    "color": "#f59e0b",
-    "extendedProps": {
-      "category": "비교과/활동",
-      "summary": "부산대 AI융합교육원에서 AI·SW 전공역량 강화를 위한 'PNU AI학습공동체' 참가팀을 모집하며, 최대 80만원의 장학금을 지원합니다. 신청 마감은 2026년 6월 29일 09:00까지입니다.",
-      "important": false
-    }
-  },
-  {
     "id": "1443327",
     "title": "한국주택금융공사 현장체험 멘토링 참가자 모집(~6/30 화)",
     "start": "2026-06-30",
@@ -84,6 +48,18 @@
     }
   },
   {
+    "id": "1447469",
+    "title": "[학생과] 국립외교원 국립외교아카데미 외교 연수 대학 참여 학생 모집",
+    "start": "2026-07-08",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1447469/artclView.do",
+    "color": "#f59e0b",
+    "extendedProps": {
+      "category": "비교과/활동",
+      "summary": "국립외교원 대학생 외교 연수과정 참가자 모집이 2026년 7월 8일 18:00까지 부산대학교 나눔 홈페이지에서 온라인으로 진행됩니다.",
+      "important": false
+    }
+  },
+  {
     "id": "1388562",
     "title": "[졸업] 2026년 8월 졸업(수료)예정자 졸업요건 서류 제출 안내: ~2026.7.10.",
     "start": "2026-07-10",
@@ -116,6 +92,18 @@
     "extendedProps": {
       "category": "비교과/활동",
       "summary": "부산대 2026학년도 2학기 학·석(박)사(통합) 연계과정 신입생 및 전환 희망 학생 모집. 7월 16일까지 지원서를 단과대학 행정실에 제출해야 합니다.",
+      "important": false
+    }
+  },
+  {
+    "id": "1447476",
+    "title": "[취업전략과] 2026 미래내일일경험 ESG지원형 'Campus AX-Ton&ap",
+    "start": "2026-07-19",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1447476/artclView.do",
+    "color": "#ec4899",
+    "extendedProps": {
+      "category": "졸업/진로",
+      "summary": "재학생·졸업생 및 지역 청년을 대상으로 AI 활용 실무 교육 「Campus AX-Ton」 참가자를 2026년 7월 19일까지 모집하며, 수료자에게 50만원 참여수당이 지급됩니다.",
       "important": false
     }
   }
