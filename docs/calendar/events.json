@@ -48,6 +48,18 @@
     }
   },
   {
+    "id": "1448319",
+    "title": "[BK21] BK21 대학원혁신 우수 학부연구생 지원 사업 신청 안내(~7/10 11시)",
+    "start": "2026-07-10",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1448319/artclView.do",
+    "color": "#6b7280",
+    "extendedProps": {
+      "category": "일반공지",
+      "summary": "부산대학교 BK21 우수 학부연구생 지원 사업에 학·석사연계과정 재학생이 2026년 7월 10일 오전 11시까지 대학원혁신실로 서류를 제출해야 합니다.",
+      "important": false
+    }
+  },
+  {
     "id": "1448138",
     "title": "[글로컬대학30] 2026 PNU-BNUE 창업 챌린지 캠프 신청 안내",
     "start": "2026-07-13",
@@ -56,6 +68,30 @@
     "extendedProps": {
       "category": "비교과/활동",
       "summary": "부산/부산교대 재학생은 에듀테크 창업 아이디어 도출 및 AI 활용 시제품 제작 캠프에 2026년 7월 13일까지 구글폼으로 신청하세요.",
+      "important": false
+    }
+  },
+  {
+    "id": "1448430",
+    "title": "[AI융합교육원]2026 여름계절 기업문제해결형 단기인턴십 참여학생 모집(~7.13)",
+    "start": "2026-07-13",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1448430/artclView.do",
+    "color": "#f59e0b",
+    "extendedProps": {
+      "category": "비교과/활동",
+      "summary": "부산대학교 컴퓨터공학과 및 데이터사이언스 3~4학년 재학생 대상 2026 여름계절 기업문제해결형 단기인턴십 참여 학생을 7월 13일 12시까지 모집합니다.",
+      "important": false
+    }
+  },
+  {
+    "id": "1448300",
+    "title": "[창업중심대학] 2026 글로벌 연합패키지-스타트업 허브 해커톤 신청 안내",
+    "start": "2026-07-14",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1448300/artclView.do",
+    "color": "#6b7280",
+    "extendedProps": {
+      "category": "일반공지",
+      "summary": "동남권 대학(원) 재휴학생을 대상으로 태국에서 열리는 글로벌 스타트업 허브 해커톤 참가자를 2026년 7월 14일(화) 17시까지 모집합니다.",
       "important": false
     }
   },
@@ -96,6 +132,30 @@
     }
   },
   {
+    "id": "1448426",
+    "title": "[AI융합교육원] AI Builder Sprint 2026 모집 안내",
+    "start": "2026-07-23",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1448426/artclView.do",
+    "color": "#f59e0b",
+    "extendedProps": {
+      "category": "비교과/활동",
+      "summary": "부산대 재학생 대상 AI Builder Sprint 2026 해커톤 참가팀을 7월 23일까지 모집하며, AI를 활용한 서비스 개발 후 총 420만원 상금 기회가 있습니다.",
+      "important": false
+    }
+  },
+  {
+    "id": "1448291",
+    "title": "2026학년도 2학기 대학생활원(부산) 비원생 모집요강 공고",
+    "start": "2026-07-24",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1448291/artclView.do",
+    "color": "#f59e0b",
+    "extendedProps": {
+      "category": "비교과/활동",
+      "summary": "학생들은 2026학년도 2학기 부산대 대학생활원 1, 2인실에 7월 24일(금) 17:00까지 온라인으로 신청하세요.",
+      "important": false
+    }
+  },
+  {
     "id": "1448132",
     "title": "[졸업] 2025학년도 후기('26.8월) 학사학위취득 유예 시행 계획 알림(~7",
     "start": "2026-07-31",
@@ -104,6 +164,18 @@
     "extendedProps": {
       "category": "졸업/진로",
       "summary": "졸업 요건을 충족한 학생은 2026년 7월 31일 17시까지 학생지원시스템에서 학사학위취득 유예를 신청해야 합니다.",
+      "important": false
+    }
+  },
+  {
+    "id": "1448302",
+    "title": "[장학] 2026.2학기 학부 등록금재원 우선선발장학금 신청 안내(국가보훈, 북한, 형제자",
+    "start": "2026-07-31",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1448302/artclView.do",
+    "color": "#8b5cf6",
+    "extendedProps": {
+      "category": "장학/등록",
+      "summary": "2026학년도 2학기 학부 우선선발장학금은 신규 신청 학부생 대상으로 2026년 7월 29일부터 7월 31일까지 학생지원시스템에서 신청해야 합니다.",
       "important": false
     }
   },
