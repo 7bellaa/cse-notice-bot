@@ -12,30 +12,6 @@
     }
   },
   {
-    "id": "1388562",
-    "title": "[졸업] 2026년 8월 졸업(수료)예정자 졸업요건 서류 제출 안내: ~2026.7.10.",
-    "start": "2026-07-10",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1388562/artclView.do",
-    "color": "#ec4899",
-    "extendedProps": {
-      "category": "졸업/진로",
-      "summary": "2026년 8월 졸업 예정자는 2026년 7월 10일까지 졸업요건 서류(영어성적표, TOPCIT 등)를 학생역량지원시스템 및 학과 URL에 온라인으로 제출해야 합니다.",
-      "important": true
-    }
-  },
-  {
-    "id": "1448319",
-    "title": "[BK21] BK21 대학원혁신 우수 학부연구생 지원 사업 신청 안내(~7/10 11시)",
-    "start": "2026-07-10",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1448319/artclView.do",
-    "color": "#6b7280",
-    "extendedProps": {
-      "category": "일반공지",
-      "summary": "부산대학교 BK21 우수 학부연구생 지원 사업에 학·석사연계과정 재학생이 2026년 7월 10일 오전 11시까지 대학원혁신실로 서류를 제출해야 합니다.",
-      "important": false
-    }
-  },
-  {
     "id": "1448138",
     "title": "[글로컬대학30] 2026 PNU-BNUE 창업 챌린지 캠프 신청 안내",
     "start": "2026-07-13",
@@ -144,6 +120,18 @@
     }
   },
   {
+    "id": "1448967",
+    "title": "[취업전략과] 자기소개서 1:1 클리닉 참가자 모집 안내(~7/30, 선착순)",
+    "start": "2026-07-30",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1448967/artclView.do",
+    "color": "#ec4899",
+    "extendedProps": {
+      "category": "졸업/진로",
+      "summary": "부산대학교 4학년 이상 재학생 및 졸업생을 대상으로 자기소개서 1:1 컨설팅을 제공하는 실전반 참가자를 2026년 7월 30일까지 선착순 모집합니다.",
+      "important": false
+    }
+  },
+  {
     "id": "1448132",
     "title": "[졸업] 2025학년도 후기('26.8월) 학사학위취득 유예 시행 계획 알림(~7",
     "start": "2026-07-31",
@@ -164,6 +152,18 @@
     "extendedProps": {
       "category": "장학/등록",
       "summary": "2026학년도 2학기 학부 우선선발장학금은 신규 신청 학부생 대상으로 2026년 7월 29일부터 7월 31일까지 학생지원시스템에서 신청해야 합니다.",
+      "important": false
+    }
+  },
+  {
+    "id": "1448989",
+    "title": "[AI융합교육원]2026 PNU AI학습공동체 선발결과 안내",
+    "start": "2026-07-31",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1448989/artclView.do",
+    "color": "#f59e0b",
+    "extendedProps": {
+      "category": "비교과/활동",
+      "summary": "PNU AI 학습공동체 선발팀은 2026년 7월 31일까지 중간 보고서를, 2026년 8월 31일까지 최종 보고서와 결과물을 제출해야 합니다.",
       "important": false
     }
   },
