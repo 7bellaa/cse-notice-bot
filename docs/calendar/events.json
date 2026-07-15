@@ -12,18 +12,6 @@
     }
   },
   {
-    "id": "1448300",
-    "title": "[창업중심대학] 2026 글로벌 연합패키지-스타트업 허브 해커톤 신청 안내",
-    "start": "2026-07-14",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1448300/artclView.do",
-    "color": "#6b7280",
-    "extendedProps": {
-      "category": "일반공지",
-      "summary": "동남권 대학(원) 재휴학생을 대상으로 태국에서 열리는 글로벌 스타트업 허브 해커톤 참가자를 2026년 7월 14일(화) 17시까지 모집합니다.",
-      "important": false
-    }
-  },
-  {
     "id": "1444649",
     "title": "2026학년도 2학기 학·석(박)사 (통합)연계과정 학생 및 전환 희망 학생 모집 안내",
     "start": "2026-07-16",
@@ -32,6 +20,18 @@
     "extendedProps": {
       "category": "비교과/활동",
       "summary": "부산대학교 2026학년도 2학기 학·석(박)사(통합)연계과정 신입 및 전환 학생 모집 지원서 접수는 2026년 7월 16일까지입니다.",
+      "important": false
+    }
+  },
+  {
+    "id": "1451921",
+    "title": "2026 Summer 반도체 설계캠프 모집 안내",
+    "start": "2026-07-17",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1451921/artclView.do",
+    "color": "#f59e0b",
+    "extendedProps": {
+      "category": "비교과/활동",
+      "summary": "부산대 재학생 대상 2026년 여름 반도체 설계 캠프 참가자를 7월 17일(금) 18시까지 구글폼으로 모집하며, 캠프는 7월 29일부터 31일까지 3일간 진행됩니다.",
       "important": false
     }
   },
@@ -56,6 +56,30 @@
     "extendedProps": {
       "category": "일반공지",
       "summary": "2026학년도 2학기 전과 신청은 2026년 7월 15일부터 7월 20일까지 학생지원시스템을 통해 온라인으로 진행됩니다. 전과를 희망하는 학생들은 기한 내 신청하시기 바랍니다.",
+      "important": false
+    }
+  },
+  {
+    "id": "1451911",
+    "title": "[AI융합교육원] 구글 코리아 취업 특강 참여 신청 안내",
+    "start": "2026-07-20",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1451911/artclView.do",
+    "color": "#f59e0b",
+    "extendedProps": {
+      "category": "비교과/활동",
+      "summary": "AI 융합교육원에서 구글 클라우드 코리아 박진호 영업대표 초청 취업 특강을 2026년 7월 20일 13시까지 신청받습니다.",
+      "important": false
+    }
+  },
+  {
+    "id": "1451860",
+    "title": "[수업]대학원 공동수강교과목 학사과정 학점 인정 신청 안내(2026년1기)",
+    "start": "2026-07-21",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1451860/artclView.do",
+    "color": "#14b8a6",
+    "extendedProps": {
+      "category": "학업/수강",
+      "summary": "학사과정 학생은 일반대학원 공동수강교과목 학점 인정을 2026년 7월 21일까지 신청해야 합니다.",
       "important": false
     }
   },
