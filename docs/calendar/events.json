@@ -12,18 +12,6 @@
     }
   },
   {
-    "id": "1444649",
-    "title": "2026학년도 2학기 학·석(박)사 (통합)연계과정 학생 및 전환 희망 학생 모집 안내",
-    "start": "2026-07-16",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1444649/artclView.do",
-    "color": "#f59e0b",
-    "extendedProps": {
-      "category": "비교과/활동",
-      "summary": "부산대학교 2026학년도 2학기 학·석(박)사(통합)연계과정 신입 및 전환 학생 모집 지원서 접수는 2026년 7월 16일까지입니다.",
-      "important": false
-    }
-  },
-  {
     "id": "1451921",
     "title": "2026 Summer 반도체 설계캠프 모집 안내",
     "start": "2026-07-17",
@@ -188,6 +176,18 @@
     "extendedProps": {
       "category": "비교과/활동",
       "summary": "PNU AI 학습공동체 선발팀은 2026년 7월 31일까지 중간 보고서를, 2026년 8월 31일까지 최종 보고서와 결과물을 제출해야 합니다.",
+      "important": false
+    }
+  },
+  {
+    "id": "1451986",
+    "title": "[앵커] 2026 PNU 제5회 창업힐링캠프 신청 안내",
+    "start": "2026-08-02",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1451986/artclView.do",
+    "color": "#f59e0b",
+    "extendedProps": {
+      "category": "비교과/활동",
+      "summary": "부산대 제5회 창업힐링캠프가 8월 7일 개최되며, 창업에 관심 있는 동남권 대학(원)생 및 (예비)창업자는 8월 2일까지 온라인으로 신청하세요.",
       "important": false
     }
   },
