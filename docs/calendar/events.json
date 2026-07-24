@@ -12,18 +12,6 @@
     }
   },
   {
-    "id": "1448426",
-    "title": "[AI융합교육원] AI Builder Sprint 2026 모집 안내",
-    "start": "2026-07-23",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1448426/artclView.do",
-    "color": "#f59e0b",
-    "extendedProps": {
-      "category": "비교과/활동",
-      "summary": "부산대학교 재학생 대상 AI Builder Sprint 2026 해커톤 참가팀을 7월 23일(목)까지 모집합니다. AI 서비스 개발에 도전하고 총 상금 420만원을 노려보세요.",
-      "important": false
-    }
-  },
-  {
     "id": "1448291",
     "title": "2026학년도 2학기 대학생활원(부산) 비원생 모집요강 공고",
     "start": "2026-07-24",
@@ -72,6 +60,18 @@
     }
   },
   {
+    "id": "1452515",
+    "title": "2026 하반기 한.미 대학생 연수(WEST) 지원자 모집 안내",
+    "start": "2026-07-30",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1452515/artclView.do",
+    "color": "#f59e0b",
+    "extendedProps": {
+      "category": "비교과/활동",
+      "summary": "부산대학교 학생들은 2026년 하반기 한·미 대학생 연수(WEST)에 지원할 수 있으며, 교내 서류 제출 마감은 2026년 7월 30일 18시입니다.",
+      "important": false
+    }
+  },
+  {
     "id": "1448132",
     "title": "[졸업] 2025학년도 후기('26.8월) 학사학위취득 유예 시행 계획 알림(~7",
     "start": "2026-07-31",
@@ -116,6 +116,18 @@
     "extendedProps": {
       "category": "비교과/활동",
       "summary": "부산대 제5회 창업힐링캠프가 8월 7일 개최되며, 창업에 관심 있는 동남권 대학(원)생 및 (예비)창업자는 8월 2일까지 온라인으로 신청하세요.",
+      "important": false
+    }
+  },
+  {
+    "id": "1452522",
+    "title": "[국립대육성] 2026 취업 Skill UP 프로그램(1차) 모집 안내",
+    "start": "2026-08-04",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1452522/artclView.do",
+    "color": "#f59e0b",
+    "extendedProps": {
+      "category": "비교과/활동",
+      "summary": "부산대 여학생 및 SAM 분야 재적생은 데이터분석준전문가(ADsP) 및 AI 프롬프트 활용능력(AI-POT) 자격증 취득 프로그램에 2026년 8월 4일 17시까지 신청해야 합니다.",
       "important": false
     }
   },
