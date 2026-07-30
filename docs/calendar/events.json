@@ -84,6 +84,30 @@
     }
   },
   {
+    "id": "1453079",
+    "title": "[학과활동] 2026학년도 1학기 정컴활동 확인 방법 안내",
+    "start": "2026-07-31",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1453079/artclView.do",
+    "color": "#f59e0b",
+    "extendedProps": {
+      "category": "비교과/활동",
+      "summary": "학생들은 정컴활동 횟수를 확인하고, 오류 수정 요청을 2026년 7월 31일 17시까지 제출해야 장학금 자격을 충족할 수 있습니다.",
+      "important": false
+    }
+  },
+  {
+    "id": "1453007",
+    "title": "[수업][필독:중요]2026학년도 2학기 정보컴퓨터공학부 수강지도",
+    "start": "2026-07-31",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1453007/artclView.do",
+    "color": "#14b8a6",
+    "extendedProps": {
+      "category": "학업/수강",
+      "summary": "부산대 정보컴퓨터공학부 2026학년도 2학기 수강신청이 진행되며, 복학 신청은 7월 31일까지, 희망과목담기는 8월 4일까지 마감입니다.",
+      "important": false
+    }
+  },
+  {
     "id": "1451986",
     "title": "[앵커] 2026 PNU 제5회 창업힐링캠프 신청 안내",
     "start": "2026-08-02",
@@ -120,6 +144,18 @@
     }
   },
   {
+    "id": "1453005",
+    "title": "[수업]2026학년도 2학기 학부 희망과목담기 및 수강신청(대기순번제) 안내",
+    "start": "2026-08-04",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1453005/artclView.do",
+    "color": "#14b8a6",
+    "extendedProps": {
+      "category": "학업/수강",
+      "summary": "학생들은 2026학년도 2학기 희망과목담기를 8월 4일까지, 수강신청은 8월 10일(1차)부터 시작하여 8월 19일(2차)까지 완료해야 합니다.",
+      "important": true
+    }
+  },
+  {
     "id": "1451985",
     "title": "[앵커] 2026 금정 유스콘 경진대회 신청 안내",
     "start": "2026-08-05",
@@ -140,6 +176,18 @@
     "extendedProps": {
       "category": "일반공지",
       "summary": "AI 및 디지털 직무에 관심 있는 청년(재학생/휴학생 포함)은 오라클 AI 스타트업 부트캠프에 2026년 8월 10일까지 온라인으로 지원하세요.",
+      "important": false
+    }
+  },
+  {
+    "id": "1453008",
+    "title": "2026학년도 2학기 현장실습 학생 모집 안내",
+    "start": "2026-08-10",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1453008/artclView.do",
+    "color": "#f59e0b",
+    "extendedProps": {
+      "category": "비교과/활동",
+      "summary": "2026학년도 2학기 현장실습학기제 참여 학생을 8월 10일까지 모집하며, 수강신청 서류는 8월 19일까지 제출해야 합니다.",
       "important": false
     }
   },
