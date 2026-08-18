@@ -12,14 +12,14 @@
     }
   },
   {
-    "id": "1454057",
-    "title": "[국립대육성] 2026 고학년 진로설계 프로그램 CAP:집단상담 1차 모집 안내",
-    "start": "2026-08-17",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1454057/artclView.do",
-    "color": "#f59e0b",
+    "id": "1456023",
+    "title": "[수업]2026학년도 2학기 수강인원 집단 조정 추가 안내",
+    "start": "2026-08-19",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1456023/artclView.do",
+    "color": "#14b8a6",
     "extendedProps": {
-      "category": "비교과/활동",
-      "summary": "부산대학교 3·4학년 재학생을 대상으로 하는 고학년 진로설계 프로그램 '대학생 CAP@: 집단상담' 참가자를 2026년 8월 17일까지 선착순 30명 모집합니다.",
+      "category": "학업/수강",
+      "summary": "2026학년도 2학기 2차 수강신청 기간(8/19) 중 수강인원 집단 조정이 8월 18일, 19일 진행되니, 학생들은 참고하여 신청 바랍니다.",
       "important": false
     }
   },
@@ -32,6 +32,18 @@
     "extendedProps": {
       "category": "비교과/활동",
       "summary": "1, 2학년 재학생을 위한 진로탐색 집단상담 프로그램(CEP) 참가자를 2026년 8월 20일(목)까지 선착순 30명 모집합니다.",
+      "important": false
+    }
+  },
+  {
+    "id": "1456054",
+    "title": "2026학년도 2학기 현장실습 지도교수 배정 및 현장실습 시행 안내",
+    "start": "2026-08-20",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1456054/artclView.do",
+    "color": "#6b7280",
+    "extendedProps": {
+      "category": "일반공지",
+      "summary": "2026학년도 2학기 현장실습 신청자는 배정된 지도교수와 상담 후 관련 서류를 2026년 8월 20일 12시까지 이메일로 제출해야 합니다.",
       "important": false
     }
   },
@@ -104,6 +116,30 @@
     "extendedProps": {
       "category": "졸업/진로",
       "summary": "부산대 4학년 이상 재학생 및 졸업생 대상 자기소개서 1:1 컨설팅 신청이 8월 27일 23시까지 선착순 마감됩니다.",
+      "important": false
+    }
+  },
+  {
+    "id": "1455721",
+    "title": "[장학] 2026.2학기 학부 등록금재원 우선선발장학금 신청(2차) 안내",
+    "start": "2026-09-04",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1455721/artclView.do",
+    "color": "#8b5cf6",
+    "extendedProps": {
+      "category": "장학/등록",
+      "summary": "2026학년도 2학기 학부 우선선발장학금 신규 신청자는 9월 4일(금) 17시까지 학생지원시스템에서 신청해야 합니다.",
+      "important": false
+    }
+  },
+  {
+    "id": "1455710",
+    "title": "[장학] 2026.2학기 교내 유니웰장학금 대상자 신규 신청 안내(9/1~9/4)",
+    "start": "2026-09-04",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1455710/artclView.do",
+    "color": "#8b5cf6",
+    "extendedProps": {
+      "category": "장학/등록",
+      "summary": "부산대학교 2026학년도 2학기 유니웰장학금 신규 신청을 9월 4일 17시까지 받습니다. 기초~차상위 아동복지시설 거주 경험 학부생은 온라인 신청 및 서류 원본을 제출해야 합니다.",
       "important": false
     }
   },
