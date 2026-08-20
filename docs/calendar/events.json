@@ -12,18 +12,6 @@
     }
   },
   {
-    "id": "1456023",
-    "title": "[수업]2026학년도 2학기 수강인원 집단 조정 추가 안내",
-    "start": "2026-08-19",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1456023/artclView.do",
-    "color": "#14b8a6",
-    "extendedProps": {
-      "category": "학업/수강",
-      "summary": "2026학년도 2학기 2차 수강신청 기간(8/19) 중 수강인원 집단 조정이 8월 18일, 19일 진행되니, 학생들은 참고하여 신청 바랍니다.",
-      "important": false
-    }
-  },
-  {
     "id": "1454056",
     "title": "[국립대육성] 2026 저학년 진로탐색 프로그램 CEP:집단상담 1차 모집 안내",
     "start": "2026-08-20",
@@ -92,6 +80,18 @@
     "extendedProps": {
       "category": "장학/등록",
       "summary": "부산대 컴공과 2026-2학기 성적우수장학금 수혜자는 8월 24일 12시까지 장학금 확인 후 문제 시 학과사무실로 문의 바랍니다.",
+      "important": false
+    }
+  },
+  {
+    "id": "1456280",
+    "title": "[국립대육성] 2026 제18기 선배와 손잡(job)기 멘토 모집 안내(졸업생 대상)",
+    "start": "2026-08-25",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1456280/artclView.do",
+    "color": "#f59e0b",
+    "extendedProps": {
+      "category": "비교과/활동",
+      "summary": "졸업생 동문 선배는 제18기 선배와 손잡(Job)기 멘토링 프로그램에 2026년 8월 25일까지 지원 바랍니다.",
       "important": false
     }
   },
