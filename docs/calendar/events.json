@@ -12,42 +12,6 @@
     }
   },
   {
-    "id": "1451734",
-    "title": "[졸업] 2026.08.21.(금) 졸업자 학위수여식 안내",
-    "start": "2026-08-21",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1451734/artclView.do",
-    "color": "#ec4899",
-    "extendedProps": {
-      "category": "졸업/진로",
-      "summary": "2026년 8월 졸업자는 8월 20~21일 IT관 304호에서 학위복 대여 및 졸업장을 수령해야 하며, 기한 내 반납해야 합니다.",
-      "important": false
-    }
-  },
-  {
-    "id": "1454127",
-    "title": "[수업]2026학년도 2학기 수강정정 대비 영어 기초학력 진단평가 실시 안내",
-    "start": "2026-08-21",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1454127/artclView.do",
-    "color": "#14b8a6",
-    "extendedProps": {
-      "category": "학업/수강",
-      "summary": "수능영어 무등급 학부생은 대학영어 수준별 분반 배정을 위한 영어 기초학력 진단평가를 2026년 8월 21일까지 신청해야 합니다.",
-      "important": true
-    }
-  },
-  {
-    "id": "1456165",
-    "title": "[수업]수강인원 초과 미신청 과목 현황 조사",
-    "start": "2026-08-21",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1456165/artclView.do",
-    "color": "#14b8a6",
-    "extendedProps": {
-      "category": "학업/수강",
-      "summary": "2026학년도 2학기 수강신청 실패 학생들은 증원 계획 수립을 위한 설문조사에 2026년 8월 21일 13시까지 참여해 주시기 바랍니다.",
-      "important": false
-    }
-  },
-  {
     "id": "1455172",
     "title": "[장학] 2026년 2학기 성적우수장학금 배정 안내",
     "start": "2026-08-24",
@@ -104,6 +68,30 @@
     "extendedProps": {
       "category": "졸업/진로",
       "summary": "부산대 4학년 이상 재학생 및 졸업생 대상 자기소개서 1:1 컨설팅 신청이 8월 27일 23시까지 선착순 마감됩니다.",
+      "important": false
+    }
+  },
+  {
+    "id": "1456430",
+    "title": "[모집] 2026 2학기 선배특강 <CSE 취업한 선배랑 잡(job)담> 참여",
+    "start": "2026-09-03",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1456430/artclView.do",
+    "color": "#f59e0b",
+    "extendedProps": {
+      "category": "비교과/활동",
+      "summary": "정보컴퓨터공학부 3,4학년 대상 선배 취업특강이 9/4(마감 9/3)과 9/11(마감 9/10)에 IT관에서 열립니다. 학생역량지원시스템으로 신청하세요.",
+      "important": false
+    }
+  },
+  {
+    "id": "1456429",
+    "title": "[모집] 2026학년도 2학기 오픈소스SW 특강 「AI 시대의 오픈소스 커뮤니티와 커리어",
+    "start": "2026-09-03",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1456429/artclView.do",
+    "color": "#f59e0b",
+    "extendedProps": {
+      "category": "비교과/활동",
+      "summary": "SW 전공 학생을 위한 AI융합교육원 오픈소스SW 특강이 2026년 9월 4일에 진행되며, 신청은 9월 3일 23:30까지입니다.",
       "important": false
     }
   },
