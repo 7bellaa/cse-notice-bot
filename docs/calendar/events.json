@@ -12,18 +12,6 @@
     }
   },
   {
-    "id": "1455172",
-    "title": "[장학] 2026년 2학기 성적우수장학금 배정 안내",
-    "start": "2026-08-24",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1455172/artclView.do",
-    "color": "#8b5cf6",
-    "extendedProps": {
-      "category": "장학/등록",
-      "summary": "부산대 컴공과 2026-2학기 성적우수장학금 수혜자는 8월 24일 12시까지 장학금 확인 후 문제 시 학과사무실로 문의 바랍니다.",
-      "important": false
-    }
-  },
-  {
     "id": "1456280",
     "title": "[국립대육성] 2026 제18기 선배와 손잡(job)기 멘토 모집 안내(졸업생 대상)",
     "start": "2026-08-25",
@@ -128,6 +116,18 @@
     "extendedProps": {
       "category": "장학/등록",
       "summary": "부산대학교 2026학년도 2학기 유니웰장학금 신규 신청을 9월 4일 17시까지 받습니다. 기초~차상위 아동복지시설 거주 경험 학부생은 온라인 신청 및 서류 원본을 제출해야 합니다.",
+      "important": false
+    }
+  },
+  {
+    "id": "1456704",
+    "title": "[인문사회융합인재양성사업] 'AI Start-Up Sprint 하루만에 초기기업",
+    "start": "2026-09-04",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1456704/artclView.do",
+    "color": "#6b7280",
+    "extendedProps": {
+      "category": "일반공지",
+      "summary": "부산대 학생들은 2026년 9월 18~19일 열리는 'AI Start-up Sprint' 캠프에 9월 4일까지 구글폼으로 신청할 수 있습니다.",
       "important": false
     }
   },
