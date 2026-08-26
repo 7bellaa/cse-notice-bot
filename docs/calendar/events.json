@@ -12,18 +12,6 @@
     }
   },
   {
-    "id": "1456280",
-    "title": "[국립대육성] 2026 제18기 선배와 손잡(job)기 멘토 모집 안내(졸업생 대상)",
-    "start": "2026-08-25",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1456280/artclView.do",
-    "color": "#f59e0b",
-    "extendedProps": {
-      "category": "비교과/활동",
-      "summary": "졸업생 동문 선배는 제18기 선배와 손잡(Job)기 멘토링 프로그램에 2026년 8월 25일까지 지원 바랍니다.",
-      "important": false
-    }
-  },
-  {
     "id": "1455303",
     "title": "2026.2학기 HUSS Career PATH-FINDER DX융합 취창업 동아리 참가팀",
     "start": "2026-08-26",
@@ -129,6 +117,18 @@
       "category": "일반공지",
       "summary": "부산대 학생들은 2026년 9월 18~19일 열리는 'AI Start-up Sprint' 캠프에 9월 4일까지 구글폼으로 신청할 수 있습니다.",
       "important": false
+    }
+  },
+  {
+    "id": "1457375",
+    "title": "[졸업요건]2026년 제26회 TOPCIT 정기평가 시행 안내_응시료지원",
+    "start": "2026-09-04",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1457375/artclView.do",
+    "color": "#ec4899",
+    "extendedProps": {
+      "category": "졸업/진로",
+      "summary": "정보컴퓨터공학부 등 학부생을 위한 2026년 TOPCIT 정기평가 응시료 지원 단체접수가 9월 4일(금) 16:00에 마감됩니다. 졸업요건 관련 학생은 기한 내 신청 바랍니다.",
+      "important": true
     }
   },
   {
