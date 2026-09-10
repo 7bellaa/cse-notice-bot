@@ -12,18 +12,6 @@
     }
   },
   {
-    "id": "1455131",
-    "title": "[장학] 2026.2학기 국가장학금 2차 신청 안내",
-    "start": "2026-09-09",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1455131/artclView.do",
-    "color": "#8b5cf6",
-    "extendedProps": {
-      "category": "장학/등록",
-      "summary": "신입생, 편입생 등은 2026년 2학기 국가장학금 2차 신청을 9월 9일 18시까지 한국장학재단 누리집에서 완료해야 합니다.",
-      "important": true
-    }
-  },
-  {
     "id": "1456624",
     "title": "[모집] 2026년 하반기 AI·SW역량검정(TOPCIT) 순회설명회 참여 안내",
     "start": "2026-09-10",
@@ -56,6 +44,18 @@
     "extendedProps": {
       "category": "장학/등록",
       "summary": "2027학년도 2학년 1학기 진학 예정자를 대상으로 미래인재육성재단 장학생을 모집하며, 신청은 2026년 9월 14일(월)까지 학과사무실 이메일로 마감됩니다.",
+      "important": false
+    }
+  },
+  {
+    "id": "1461545",
+    "title": "[차세대공학자양성사업단] 2026 차세대 양성사업단 실전문제연구팀 모집 안내",
+    "start": "2026-09-14",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1461545/artclView.do",
+    "color": "#f59e0b",
+    "extendedProps": {
+      "category": "비교과/활동",
+      "summary": "부산대 차세대 공학자 양성사업단에서 이공계열 학부생 연구팀을 9월 14일 13시까지 모집하며, 팀당 500~700만원 연구비를 지원합니다.",
       "important": false
     }
   },
@@ -104,6 +104,30 @@
     "extendedProps": {
       "category": "장학/등록",
       "summary": "고졸 후학습자 장학사업(희망사다리 II) 신규장학생을 2026년 9월 18일까지 한국장학재단 홈페이지에서 모집합니다. 고졸 및 재직 요건 충족 시 등록금 지원.",
+      "important": false
+    }
+  },
+  {
+    "id": "1461554",
+    "title": "2027학년도 특차 일반대학원 신입생 모집요강 공고(2027.3월 입학)",
+    "start": "2026-09-18",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1461554/artclView.do",
+    "color": "#f59e0b",
+    "extendedProps": {
+      "category": "비교과/활동",
+      "summary": "부산대학교 전형의 지원서 인터넷 접수 및 구비서류 제출 마감은 2026년 9월 18일(금) 18:00입니다. 면접고사는 10월 23일(금)에 진행됩니다.",
+      "important": false
+    }
+  },
+  {
+    "id": "1461544",
+    "title": "[학생성공개발원] 2026년도 공무원 5급 공채 2차 합격자 3차(면접)시험 대비 지원 신",
+    "start": "2026-09-18",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1461544/artclView.do",
+    "color": "#6b7280",
+    "extendedProps": {
+      "category": "일반공지",
+      "summary": "부산대학교 학생성공개발원에서 5급 공채 2차 합격자 대상으로 면접 대비 지원금(최대 25만원)을 지급하며, 신청 마감은 2026년 9월 18일입니다.",
       "important": false
     }
   },
