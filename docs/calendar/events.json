@@ -12,30 +12,6 @@
     }
   },
   {
-    "id": "1456624",
-    "title": "[모집] 2026년 하반기 AI·SW역량검정(TOPCIT) 순회설명회 참여 안내",
-    "start": "2026-09-10",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1456624/artclView.do",
-    "color": "#f59e0b",
-    "extendedProps": {
-      "category": "비교과/활동",
-      "summary": "TOPCIT 응시 준비 학생은 9월 10일까지 설명회를 신청하고, 9월 11일 18시까지 제26회 TOPCIT 정기평가 접수를 완료해야 합니다.",
-      "important": true
-    }
-  },
-  {
-    "id": "1458078",
-    "title": "[장학] 2026.2학기 푸른등대 기부장학금 신규장학생 선발 안내",
-    "start": "2026-09-10",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1458078/artclView.do",
-    "color": "#8b5cf6",
-    "extendedProps": {
-      "category": "장학/등록",
-      "summary": "저소득층 우수 대학생을 위한 2026년 2학기 푸른등대 기부장학금 신규 장학생을 9월 10일(목) 18시까지 한국장학재단에서 신청하세요.",
-      "important": false
-    }
-  },
-  {
     "id": "1459727",
     "title": "[장학] 2027학년도 미래인재육성재단 장학생 신청 안내(~9/14 월)",
     "start": "2026-09-14",
@@ -189,6 +165,18 @@
       "category": "일반공지",
       "summary": "부산대학교 컴퓨터공학과 재학생은 2026년 9월 2일부터 12월 28일까지 지도교수 상담을 완료해야 합니다. 미상담 시 장학선발 제외 등 불이익이 있습니다.",
       "important": false
+    }
+  },
+  {
+    "id": "1388562",
+    "title": "[졸업] 2027년 2월 졸업(수료)예정자 졸업요건 서류 제출 안내: ~2027.1.8.(",
+    "start": "2027-01-08",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1388562/artclView.do",
+    "color": "#ec4899",
+    "extendedProps": {
+      "category": "졸업/진로",
+      "summary": "2027년 2월 졸업 예정자는 영어, TOPCIT 등 졸업요건 서류를 2027년 1월 8일까지 학생역량지원시스템 및 학과 서버에 제출해야 합니다.",
+      "important": true
     }
   },
   {
