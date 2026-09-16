@@ -36,18 +36,6 @@
     }
   },
   {
-    "id": "1454059",
-    "title": "[대학원] 2027학년도 특차 일반대학원 신입생 모집요강",
-    "start": "2026-09-18",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1454059/artclView.do",
-    "color": "#f59e0b",
-    "extendedProps": {
-      "category": "비교과/활동",
-      "summary": "부산대학교 2027학년도 특차 일반대학원 신입생은 2026년 9월 18일까지 인터넷 원서 접수 및 구비서류를 제출해야 합니다.",
-      "important": false
-    }
-  },
-  {
     "id": "1458722",
     "title": "[장학] 2026.2학기 중소기업 취업연계 장학사업(희망사다리 I유형) 학생 신청기간 안내",
     "start": "2026-09-18",
@@ -116,6 +104,18 @@
     "extendedProps": {
       "category": "비교과/활동",
       "summary": "1학년 수료 학점 이상 이수(예정)자는 2026년 9월 30일까지 2027학년도 1학기 학생설계전공 이수자 선발에 신청하시기 바랍니다.",
+      "important": false
+    }
+  },
+  {
+    "id": "1463020",
+    "title": "[수업]2026학년도 2학기 학부 수강취소(W) 안내",
+    "start": "2026-10-08",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1463020/artclView.do",
+    "color": "#14b8a6",
+    "extendedProps": {
+      "category": "학업/수강",
+      "summary": "학부생은 2026학년도 2학기 수강취소를 10월 8일까지 학생지원시스템에서 신청해야 합니다.",
       "important": false
     }
   },
