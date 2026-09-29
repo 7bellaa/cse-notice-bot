@@ -12,18 +12,6 @@
     }
   },
   {
-    "id": "1458714",
-    "title": "[학생성공개발원] 자기소개서 1:1클리닉(4~5차) 참가자 모집 안내",
-    "start": "2026-09-28",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1458714/artclView.do",
-    "color": "#f59e0b",
-    "extendedProps": {
-      "category": "비교과/활동",
-      "summary": "부산대학교는 4학년 이상 재학생 및 졸업생 등을 대상으로 자기소개서 1:1 컨설팅 실전반을 운영하며, 4차는 9월 28일, 5차는 10월 28일까지 학생역량지원시스템에서 신청받습니다.",
-      "important": false
-    }
-  },
-  {
     "id": "1463475",
     "title": "[학생과] 2026학년도 제39기 부산대학교 산학협력 해외봉사단 참가 신청 안내(~9/29",
     "start": "2026-09-29",
@@ -80,6 +68,18 @@
     "extendedProps": {
       "category": "비교과/활동",
       "summary": "공학계열 학부생은 2026 글로벌 AX-PBL 현장실증 공학교육 프로그램에 2026년 9월 30일까지 이메일로 신청해야 합니다.",
+      "important": false
+    }
+  },
+  {
+    "id": "1464379",
+    "title": "[부산대기술지주] PNU TECH BIZ WEEK 2026 5분 IR 피칭 창업 아이디어",
+    "start": "2026-09-30",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1464379/artclView.do",
+    "color": "#6b7280",
+    "extendedProps": {
+      "category": "일반공지",
+      "summary": "부산대 및 동남권역 대학(원)생, (예비)창업자를 위한 5분 IR 피칭 창업 아이디어 경진대회 접수가 2026년 9월 30일 16시까지 진행됩니다.",
       "important": false
     }
   },
