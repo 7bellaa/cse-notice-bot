@@ -12,54 +12,6 @@
     }
   },
   {
-    "id": "1459956",
-    "title": "2027학년도 1학기 학생설계전공 이수자 선발 계획 알림",
-    "start": "2026-09-30",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1459956/artclView.do",
-    "color": "#f59e0b",
-    "extendedProps": {
-      "category": "비교과/활동",
-      "summary": "1학년 수료 학점 이상 이수(예정)자는 2026년 9월 30일까지 2027학년도 1학기 학생설계전공 이수자 선발에 신청하시기 바랍니다.",
-      "important": false
-    }
-  },
-  {
-    "id": "1463821",
-    "title": "[대학일자리] 금정구 지역청년 대상 자기소개서 완성 실전반 신청 안내(~10/19)",
-    "start": "2026-09-30",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1463821/artclView.do",
-    "color": "#6b7280",
-    "extendedProps": {
-      "category": "일반공지",
-      "summary": "부산대학교 대학일자리플러스센터는 금정구 거주 미취업 청년을 위한 자기소개서 1:1 컨설팅 실전반을 운영하며, 1차 신청은 2026년 9월 30일 23시까지입니다.",
-      "important": false
-    }
-  },
-  {
-    "id": "1463820",
-    "title": "[국립대육성] 2026 글로벌 AX-PBL 현장실증 공학교육 프로그램 신청 안내(~9/30",
-    "start": "2026-09-30",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1463820/artclView.do",
-    "color": "#f59e0b",
-    "extendedProps": {
-      "category": "비교과/활동",
-      "summary": "공학계열 학부생은 2026 글로벌 AX-PBL 현장실증 공학교육 프로그램에 2026년 9월 30일까지 이메일로 신청해야 합니다.",
-      "important": false
-    }
-  },
-  {
-    "id": "1464379",
-    "title": "[부산대기술지주] PNU TECH BIZ WEEK 2026 5분 IR 피칭 창업 아이디어",
-    "start": "2026-09-30",
-    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1464379/artclView.do",
-    "color": "#6b7280",
-    "extendedProps": {
-      "category": "일반공지",
-      "summary": "부산대 및 동남권역 대학(원)생, (예비)창업자를 위한 5분 IR 피칭 창업 아이디어 경진대회 접수가 2026년 9월 30일 16시까지 진행됩니다.",
-      "important": false
-    }
-  },
-  {
     "id": "1464599",
     "title": "[TechWeek] 2026 정컴 테크위크 산학교류회(IT전문가 특강) 강연자 및 주제 안",
     "start": "2026-10-01",
@@ -69,6 +21,18 @@
       "category": "비교과/활동",
       "summary": "2026년 10월 1일(목) 부산대 정보컴퓨터학부 테크위크 산학교류회가 IT관 306, 307호에서 15시부터 17시까지 열리며, 경품권 추첨은 15시에 마감되고 학생들은 15시까지 착석해야 합니다.",
       "important": false
+    }
+  },
+  {
+    "id": "1464728",
+    "title": "2026 정컴 TECH WEEK 프로그래밍 대회 우수자 및 SW중심대학 마일스톤 장학생 선",
+    "start": "2026-10-05",
+    "url": "https://cse.pusan.ac.kr/bbs/cse/2055/1464728/artclView.do",
+    "color": "#8b5cf6",
+    "extendedProps": {
+      "category": "장학/등록",
+      "summary": "2026 정컴 TECH WEEK 및 SW 중심대학 마일스톤 프로그램 장학생 선발 결과가 공지되었으며, 장학금 서류는 10월 5일까지 이메일로 제출해야 합니다.",
+      "important": true
     }
   },
   {
